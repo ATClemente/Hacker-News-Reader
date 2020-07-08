@@ -1,38 +1,65 @@
 import React from 'react';
-import { StyleSheet, Text, View, FlatList, Dimensions, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, FlatList, Dimensions, ActivityIndicator, TouchableOpacity, ScrollView, TouchableNativeFeedback } from 'react-native';
 import * as HN_Util from './HackerNewsAPIUtil';
 import * as WebBrowser from 'expo-web-browser';
 import { Feather } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-community/async-storage';
+import * as StorageService from "../services/StorageService";
 
 type ItemProps = {
-    itemID: number,
-    index: number
+    //itemID: number,
+    itemData: any,
+    index: number,
+    hideItem: Function,
+    read: boolean
 }
 
 type ItemState = {
-    itemData: any
+    itemData: any,
+    hasBeenRead: boolean,
 }
 
 
 const {width, height} = Dimensions.get('window');
 
-export default class Item extends React.PureComponent<ItemProps, ItemState>{
+export default class Item extends React.Component<ItemProps, ItemState>{
     constructor(props: ItemProps){
         super(props)
 
         this.state = {
-            itemData: null
+            itemData: null,
+            hasBeenRead: false
         }
     }
 
     async componentDidMount(){
-        let data = await HN_Util.getItem(this.props.itemID);
-        this.setState({itemData: data});
+        //let data = await HN_Util.getItem(this.props.itemID);
+        //await this.setState({itemData: data});
+        //console.log("item is mounting! " + this.props.index);
+
+        this.setState({itemData: this.props.itemData, hasBeenRead: this.props.read});
+    }
+
+    async componentDidUpdate(prevProps: ItemProps, prevState: ItemState){
+        /*if(prevProps.itemData.descendants !== this.props.itemData.descendants){
+            this.setState({itemData: this.props.itemData});
+        }*/
+        //let data = await HN_Util.getItem(this.props.itemID);
+
+        /*if(!!prevState.itemData){
+            let data = await HN_Util.getItem(this.props.itemID);
+            if(prevState.itemData.descendants !== data.descendants || prevState.itemData.score !== data.score){
+                await this.setState({itemData: data});
+            }
+        }*/
+        //if(prevState.itemData.descendants !== data.descendants){
+        //    this.setState({itemData: data});
+        //}
     }
 
 
     render(){
-        if(!this.state.itemData){
+        if(!this.props.itemData){
             return(
                 <View style={[styles.itemCard, {justifyContent: "center"}]}>
                     <ActivityIndicator size={"large"}/>
@@ -47,8 +74,8 @@ export default class Item extends React.PureComponent<ItemProps, ItemState>{
                     showsHorizontalScrollIndicator={false}
                     decelerationRate={"fast"}
                 >
-                    {this.renderInfoCard(this.state.itemData)}
-                    {this.renderControls(this.state.itemData)}
+                    {this.renderInfoCard(this.props.itemData)}
+                    {this.renderControls(this.props.itemData)}
                 </ScrollView>
             );
 
@@ -57,30 +84,37 @@ export default class Item extends React.PureComponent<ItemProps, ItemState>{
 
     renderInfoCard = (itemData: any) => {
         return(
-            <TouchableOpacity onPress={() => {WebBrowser.openBrowserAsync(itemData.url)}}>
+            <TouchableNativeFeedback onPress={() => {this.viewItem(itemData)}}>
                 <View style={styles.itemCard}>
-                        <View style={{flex:1, borderColor: "gray", borderRightWidth: 1, alignItems: "center", justifyContent: "center"}}>
+                        <View style={{flex:1, backgroundColor: "rgb(255, 212, 184)", borderColor: "rgb(255, 212, 184)", borderRightWidth: 1, alignItems: "center", justifyContent: "center"}}>
                             <Text style={{textAlignVertical: "center"}}>{this.props.index+1}</Text>
                         </View>
-                        <View style={{flex: 9, padding: 5}}>
+                        <View style={{flex: 9, padding: 5, justifyContent:"space-between"}}>
                             <View style={{flexDirection: "row"}}>
-                                <Text style={{fontSize: 16, textAlignVertical: "center", marginRight: 10}}>{itemData.score}</Text>
+                                <Text style={styles.scoreStyle}>{itemData.score}</Text>
                                 <Text style={{fontSize: 16, textAlignVertical: "center", marginRight: 10}}>-</Text>
                                 <Text style={{textAlignVertical: "center", marginRight: 10}}>{itemData.by}</Text>
                                 <Text style={{fontSize: 16, textAlignVertical: "center", marginRight: 10}}>-</Text>
                                 <Text style={{textAlignVertical: "center", marginRight: 10}}>{this.calcTime(itemData.time)}</Text>
                                 <Text style={{fontSize: 16, textAlignVertical: "center", marginRight: 10}}>-</Text>
                                 <Text style={{textAlignVertical: "center", marginRight: 10}}>{itemData.descendants} comments</Text>
+                                
+                                { this.state.hasBeenRead &&
+                                    <React.Fragment>
+                                        <View style={{flex:1}}/>
+                                        <Feather name="book-open" size={24} color="black" />
+                                    </React.Fragment>
+                                }
                             </View>
                             <View style={{flexDirection: "row"}}>
-                                <Text style={{fontSize: 18}}>{itemData.title}</Text>
+                                <Text style={styles.titleText}>{itemData.title}</Text>
                             </View>
-                            <View style={{flexDirection: "row"}}>
-                                <Text style={{fontSize: 14}}>{itemData.url}</Text>
+                            <View style={{flexDirection: "row", opacity: 0.5}}>
+                                <Text style={styles.urlText}>{itemData.url}</Text>
                             </View>
                         </View>
                 </View>
-            </TouchableOpacity>
+            </TouchableNativeFeedback>
         );
     }
 
@@ -102,8 +136,10 @@ export default class Item extends React.PureComponent<ItemProps, ItemState>{
                 </View>
 
                 <View style={{alignItems: "center"}}>
-                    <Feather name="x" size={24} color="black" />
-                    <Text>Hide</Text>
+                    <TouchableOpacity onPress={() => {this.props.hideItem(this.props.index)}}>
+                        <Feather name="x" size={24} color="black" />
+                        <Text>Hide</Text>
+                    </TouchableOpacity>
                 </View>
 
                 <View style={{alignItems: "center"}}>
@@ -162,6 +198,17 @@ export default class Item extends React.PureComponent<ItemProps, ItemState>{
         
     }
 
+    viewItem = async (itemData: any) => {
+        if(!!itemData.url){
+            WebBrowser.openBrowserAsync(itemData.url);
+        }
+        else if(!!itemData.text){
+            console.log(itemData.text);
+        }
+        StorageService.addReadItem(itemData.id);
+        this.setState({hasBeenRead: true});
+    }
+
 
 }
 
@@ -174,10 +221,10 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
     },
     itemCard:{
-        width: width - 10,
-        marginLeft: 5,
-        marginRight: 5,
-        borderRadius: 3,
+        width: width - 14,
+        marginLeft: 7,
+        marginRight: 7,
+        borderRadius: 5,
         minHeight: 100,
         backgroundColor: "white",
         shadowColor: "#000",
@@ -188,14 +235,14 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.20,
         shadowRadius: 1.41,
 
-        elevation: 2,
+        elevation: 3,
         flexDirection: "row"
     },
     controlsCard:{
-        width: width - 10,
-        marginLeft: 5,
-        marginRight: 5,
-        borderRadius: 3,
+        width: width - 14,
+        marginLeft: 7,
+        marginRight: 7,
+        borderRadius: 5,
         minHeight: 100,
         backgroundColor: "white",
         shadowColor: "#000",
@@ -206,9 +253,23 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.20,
         shadowRadius: 1.41,
 
-        elevation: 2,
+        elevation: 3,
         flexDirection: "row",
         alignItems: 'center',
         justifyContent: 'space-around',
+    },
+    scoreStyle:{
+        fontSize: 16,
+        textAlignVertical: "center", 
+        marginRight: 10,
+        color: "#2196F3"
+    },
+    urlText:{
+        fontSize: 14,
+        opacity: 0.8
+    },
+    titleText:{
+        fontSize: 16,
+        fontWeight: "700"
     }
   });

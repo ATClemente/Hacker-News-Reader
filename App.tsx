@@ -1,38 +1,21 @@
 import { StatusBar } from 'expo-status-bar';
 import * as Font from 'expo-font';
 import { Feather } from '@expo/vector-icons';
-import React, { useState }  from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useState, Ref }  from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, DrawerLayoutAndroid, TouchableNativeFeedback } from 'react-native';
 
 
 import News from './components/News';
 
-import * as HN_Util from './components/HackerNewsAPIUtil';
 
-
-async function loadData(newsMode: string, setNewsObject: Function){
-  let data = [];
-  console.log(newsMode);
-  if(newsMode === "top"){
-    data = await HN_Util.getTopStories();
-  }
-  else if(newsMode === "best"){
-    data = await HN_Util.getBestStories();
-  }
-
-  setNewsObject({newsData: data, isLoadingComplete: true, newsMode: newsMode});
-}
+let drawerRef: React.RefObject<DrawerLayoutAndroid> = React.createRef();
 
 export default function App() {
-  const [newsObject, setNewsObject] = useState({newsData: [], isLoadingComplete: false, newsMode: "top"});
+  const [newsMode, setNewsMode] = useState("top");
   const [resourcesLoaded, setResourcesLoaded] = useState(false);
 
   if(!resourcesLoaded){
     loadResources(setResourcesLoaded);
-  }
-
-  if(!newsObject.isLoadingComplete){
-    loadData(newsObject.newsMode, setNewsObject);
     return(
       <View style={styles.container}>
         <ActivityIndicator size={"large"}></ActivityIndicator>
@@ -42,18 +25,44 @@ export default function App() {
   else{
     return (
       <View style={styles.container}>
-        <StatusBar style="auto" />
+        <StatusBar style="auto" backgroundColor={"rgb(255, 102, 0)"} />
         <View style={{marginTop: 24}}/>
-        <News newsData={newsObject.newsData}/>
+        <DrawerLayoutAndroid
+          ref={drawerRef}
+          renderNavigationView={()=>navigationView(setNewsMode, drawerRef)}
+          drawerWidth={250}
+        >
+          <News newsType={newsMode}/>
+        </DrawerLayoutAndroid>
       </View>
     );
   }
 
 }
 
-function changeNewsData(type: string, setNewsObject: Function){
-  setNewsObject({newsData: null, isLoadingComplete: false, newsMode: type});
-  loadData(type, setNewsObject);
+function navigationView(setNewsMode: Function, drawer: any){
+  return(
+    <View style={{flex:1, padding: 20}}>
+
+      <TouchableNativeFeedback onPress={() => {drawer.current.closeDrawer(); changeNewsData("top", setNewsMode );}}>
+        <View style={{flexDirection: "row", height: 60}}>
+          <Text style={{fontSize: 20, fontWeight: "bold", textAlignVertical: "center"}}>Top Stories</Text>
+
+        </View>
+      </TouchableNativeFeedback>
+
+      <TouchableNativeFeedback onPress={() => {drawer.current.closeDrawer(); changeNewsData("best", setNewsMode );}}>
+        <View style={{flexDirection: "row", height: 60}}>
+          <Text style={{fontSize: 20, fontWeight: "bold", textAlignVertical: "center"}}>Best Stories</Text>
+          
+        </View>
+      </TouchableNativeFeedback>
+    </View>
+  );
+}
+
+function changeNewsData(type: string, setNewsMode: Function){
+  setNewsMode(type);
 }
 
 async function loadResources(setResourcesLoaded: Function) {
@@ -67,12 +76,11 @@ async function loadResources(setResourcesLoaded: Function) {
 }
 
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    //alignItems: 'center',
+    //justifyContent: 'center',
   },
 });
