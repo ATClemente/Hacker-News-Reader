@@ -4,14 +4,20 @@ import { Feather } from '@expo/vector-icons';
 import React, { useState, useEffect, Ref }  from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, DrawerLayoutAndroid, TouchableNativeFeedback, BackHandler, Alert } from 'react-native';
 
+import Profile from './components/Profile';
+
+import { NavigationContainer, useFocusEffect } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+const Stack = createStackNavigator();
 
 import News from './components/News';
 
 
 let drawerRef: React.RefObject<DrawerLayoutAndroid> = React.createRef();
 
-export default function App() {
-  useEffect(() => {
+
+function NewsScreen({navigation} : {navigation:any}){
+  /*useEffect(() => {
     const backAction = () => {
       Alert.alert("", "Are you sure you want to close?", [
         {
@@ -30,7 +36,27 @@ export default function App() {
     );
 
     return () => backHandler.remove();
-  }, []);
+  }, []);*/
+
+  useFocusEffect(()=>{
+    const onBackPress = () => {
+      Alert.alert("", "Are you sure you want to close?", [
+        {
+          text: "NO",
+          onPress: () => null,
+          style: "cancel"
+        },
+        { text: "YES", onPress: () => BackHandler.exitApp() }
+      ]);
+      return true;
+    };
+
+    BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+    return () =>
+      BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }
+  );
 
   const [newsMode, setNewsMode] = useState("top");
   const [resourcesLoaded, setResourcesLoaded] = useState(false);
@@ -50,7 +76,7 @@ export default function App() {
         <View style={{marginTop: 24}}/>
         <DrawerLayoutAndroid
           ref={drawerRef}
-          renderNavigationView={()=>navigationView(setNewsMode, drawerRef)}
+          renderNavigationView={()=>navigationView(setNewsMode, drawerRef, navigation)}
           drawerWidth={250}
         >
           <News newsType={newsMode}/>
@@ -58,10 +84,29 @@ export default function App() {
       </View>
     );
   }
+}
+
+function ProfileScreen({route, navigation}: {route:any, navigation:any}) {
+  return (
+    <Profile userId={route.params.userId} />
+  );
+}
+
+
+export default function App() {
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen options={{headerShown:false}} name="News" component={NewsScreen} />
+        <Stack.Screen options={{headerShown:false}} name="Profile" component={ProfileScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
 
 }
 
-function navigationView(setNewsMode: Function, drawer: any){
+function navigationView(setNewsMode: Function, drawer: any, navigation: any){
   return(
     <View style={{flex:1, padding: 20}}>
 
@@ -82,6 +127,14 @@ function navigationView(setNewsMode: Function, drawer: any){
       <TouchableNativeFeedback onPress={() => {drawer.current.closeDrawer(); changeNewsData("new", setNewsMode );}}>
         <View style={{flexDirection: "row", height: 60}}>
           <Text style={{fontSize: 20, fontWeight: "bold", textAlignVertical: "center"}}>New Stories</Text>
+          
+        </View>
+      </TouchableNativeFeedback>
+
+
+      <TouchableNativeFeedback onPress={() => {navigation.navigate('Profile',{userId:15})}}>
+        <View style={{flexDirection: "row", height: 60}}>
+          <Text style={{fontSize: 20, fontWeight: "bold", textAlignVertical: "center"}}>Testing</Text>
           
         </View>
       </TouchableNativeFeedback>
