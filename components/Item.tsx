@@ -11,7 +11,8 @@ type ItemProps = {
     itemData: any,
     index: number,
     hideItem: Function,
-    read: boolean
+    read: boolean,
+    openItemModal: Function
 }
 
 type ItemState = {
@@ -22,7 +23,7 @@ type ItemState = {
 
 const {width, height} = Dimensions.get('window');
 
-export default class Item extends React.Component<ItemProps, ItemState>{
+export default class Item extends React.PureComponent<ItemProps, ItemState>{
     constructor(props: ItemProps){
         super(props)
 
@@ -91,13 +92,15 @@ export default class Item extends React.Component<ItemProps, ItemState>{
                         </View>
                         <View style={{flex: 9, padding: 5, justifyContent:"space-between"}}>
                             <View style={{flexDirection: "row"}}>
-                                <Text style={styles.scoreStyle}>{itemData.score}</Text>
-                                <Text style={{fontSize: 16, textAlignVertical: "center", marginRight: 10}}>-</Text>
-                                <Text style={{textAlignVertical: "center", marginRight: 10}}>{itemData.by}</Text>
-                                <Text style={{fontSize: 16, textAlignVertical: "center", marginRight: 10}}>-</Text>
-                                <Text style={{textAlignVertical: "center", marginRight: 10}}>{this.calcTime(itemData.time)}</Text>
-                                <Text style={{fontSize: 16, textAlignVertical: "center", marginRight: 10}}>-</Text>
-                                <Text style={{textAlignVertical: "center", marginRight: 10}}>{itemData.descendants} comments</Text>
+                                <View style={{flexDirection:"row", flexWrap:"wrap"}}>
+                                    <Text style={styles.scoreStyle}>{itemData.score}</Text>
+                                    <Text style={{fontSize: 16, textAlignVertical: "center", marginRight: 10}}>-</Text>
+                                    <Text style={{textAlignVertical: "center", marginRight: 10}}>{itemData.by}</Text>
+                                    <Text style={{fontSize: 16, textAlignVertical: "center", marginRight: 10}}>-</Text>
+                                    <Text style={{textAlignVertical: "center", marginRight: 10}}>{this.calcTime(itemData.time)}</Text>
+                                    <Text style={{fontSize: 16, textAlignVertical: "center", marginRight: 10}}>-</Text>
+                                    <Text style={{textAlignVertical: "center", marginRight: 10}}>{itemData.descendants} comments</Text>
+                                </View>
                                 
                                 { this.state.hasBeenRead &&
                                     <React.Fragment>
@@ -125,22 +128,25 @@ export default class Item extends React.Component<ItemProps, ItemState>{
                     <Feather name="triangle" size={24} color="black" />
                     <Text>Vote Up</Text>
                 </View>
-                <View style={{alignItems: "center"}}>
-                    <Feather name="message-square" size={24} color="black" />
-                    <Text>Comments</Text>
-                </View>
+
+                <TouchableOpacity onPress={() => {this.props.openItemModal(this.state.itemData)}}>
+                    <View style={{alignItems: "center"}}>
+                        <Feather name="message-square" size={24} color="black" />
+                        <Text>Comments</Text>
+                    </View>
+                </TouchableOpacity>
 
                 <View style={{alignItems: "center"}}>
                     <Feather name="share-2" size={24} color="black" />
                     <Text>Share</Text>
                 </View>
 
-                <View style={{alignItems: "center"}}>
-                    <TouchableOpacity onPress={() => {this.props.hideItem(this.props.index)}}>
+                <TouchableOpacity onPress={() => {this.props.hideItem(this.props.index)}}>
+                    <View style={{alignItems: "center"}}>
                         <Feather name="x" size={24} color="black" />
                         <Text>Hide</Text>
-                    </TouchableOpacity>
-                </View>
+                    </View>
+                </TouchableOpacity>
 
                 <View style={{alignItems: "center"}}>
                     <Feather name="pocket" size={24} color="black" />
@@ -203,7 +209,7 @@ export default class Item extends React.Component<ItemProps, ItemState>{
             WebBrowser.openBrowserAsync(itemData.url);
         }
         else if(!!itemData.text){
-            console.log(itemData.text);
+            this.props.openItemModal(this.state.itemData)
         }
         StorageService.addReadItem(itemData.id);
         this.setState({hasBeenRead: true});

@@ -1,8 +1,8 @@
 import { StatusBar } from 'expo-status-bar';
 import * as Font from 'expo-font';
 import { Feather } from '@expo/vector-icons';
-import React, { useState, Ref }  from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, DrawerLayoutAndroid, TouchableNativeFeedback } from 'react-native';
+import React, { useState, useEffect, Ref }  from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, DrawerLayoutAndroid, TouchableNativeFeedback, BackHandler, Alert } from 'react-native';
 
 
 import News from './components/News';
@@ -11,6 +11,27 @@ import News from './components/News';
 let drawerRef: React.RefObject<DrawerLayoutAndroid> = React.createRef();
 
 export default function App() {
+  useEffect(() => {
+    const backAction = () => {
+      Alert.alert("", "Are you sure you want to close?", [
+        {
+          text: "NO",
+          onPress: () => null,
+          style: "cancel"
+        },
+        { text: "YES", onPress: () => BackHandler.exitApp() }
+      ]);
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
+
   const [newsMode, setNewsMode] = useState("top");
   const [resourcesLoaded, setResourcesLoaded] = useState(false);
 

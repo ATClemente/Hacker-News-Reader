@@ -1,9 +1,10 @@
 import React from 'react';
-import { StyleSheet, Text, View, FlatList, ActivityIndicator, RefreshControl, Dimensions, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, FlatList, ActivityIndicator, RefreshControl, Dimensions, TouchableOpacity, Modal } from 'react-native';
 import * as StorageService from "../services/StorageService";
 
 import * as HN_Util from './HackerNewsAPIUtil';
 import Item from './Item';
+import ItemModal from './ItemModal';
 
 type NewsProps = {
     newsType: string
@@ -15,7 +16,9 @@ type NewsState = {
     itemIDs: Array<number>,
     startSlice: number,
     dataLoading: boolean,
-    readItems: number[]
+    readItems: number[],
+    showItemModal: boolean,
+    selectedItem: any
 }
 
 let loadDataBatch = true;
@@ -32,7 +35,9 @@ export default class News extends React.Component<NewsProps, NewsState>{
             newsData: [],
             itemIDs: [],
             readItems: [],
-            dataLoading: true
+            dataLoading: true,
+            showItemModal: false,
+            selectedItem: {}
         }
 
     }
@@ -64,34 +69,43 @@ export default class News extends React.Component<NewsProps, NewsState>{
         }
         else{
             return(
-                <FlatList
-                    style={{backgroundColor: "#D3D3D3"}}
-                    keyExtractor={(item) => item.id.toString()}
-                    data={this.state.newsData}
-                    renderItem={this._renderItem}
-                    ItemSeparatorComponent={() => <View style={{marginTop:7}}/>}
-                    ListHeaderComponent={this._renderListHeader}
-                    ListFooterComponent={this._renderListFooter}
-                    //initialNumToRender={8}
-                    //maxToRenderPerBatch={1}
-                    windowSize={10}
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={this.state.dataLoading}
-                            onRefresh={this.loadInitialData}
-                            colors={["red", "blue", "green"]}
-                        />
-                    }
-                    onEndReached={this.loadNextBatch}
-                    onEndReachedThreshold={0.5}
-                />
+                <React.Fragment>
+                    <FlatList
+                        style={{backgroundColor: "#D3D3D3"}}
+                        keyExtractor={(item) => item.id.toString()}
+                        data={this.state.newsData}
+                        renderItem={this._renderItem}
+                        ItemSeparatorComponent={() => <View style={{marginTop:7}}/>}
+                        ListHeaderComponent={this._renderListHeader}
+                        ListFooterComponent={this._renderListFooter}
+                        //initialNumToRender={8}
+                        //maxToRenderPerBatch={1}
+                        windowSize={10}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={this.state.dataLoading}
+                                onRefresh={this.loadInitialData}
+                                colors={["red", "blue", "green"]}
+                            />
+                        }
+                        onEndReached={this.loadNextBatch}
+                        onEndReachedThreshold={0.5}
+                    />
+                    <ItemModal
+                        visible={ this.state.showItemModal }
+                        setVisible={ (vis: boolean) => { this.setModalVisible(vis) }}
+                        itemData={this.state.selectedItem}
+                    >
+                    </ItemModal>
+                </React.Fragment>
+
             );
         }
     }
 
     _renderItem = ({item, index} : {item: any, index: number}) => {
         return(
-            <Item itemData={item} index={index} hideItem={this.hideItem} read={this.state.readItems.includes(item.id)}/>
+            <Item itemData={item} index={index} hideItem={this.hideItem} read={this.state.readItems.includes(item.id)} openItemModal={this.showItemModal}/>
         );
     }
 
@@ -132,6 +146,14 @@ export default class News extends React.Component<NewsProps, NewsState>{
         temp.splice(index, 1);
 
         this.setState({newsData: temp});
+    }
+    
+    showItemModal = (item: any) => {
+        this.setState({showItemModal: true, selectedItem: item});
+    }
+
+    setModalVisible = (visible: boolean) => {
+        this.setState({showItemModal: visible});
     }
 
 
