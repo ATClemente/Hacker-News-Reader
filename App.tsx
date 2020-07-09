@@ -78,6 +78,13 @@ function navigationView(setNewsMode: Function, drawer: any){
           
         </View>
       </TouchableNativeFeedback>
+
+      <TouchableNativeFeedback onPress={() => {drawer.current.closeDrawer(); changeNewsData("new", setNewsMode );}}>
+        <View style={{flexDirection: "row", height: 60}}>
+          <Text style={{fontSize: 20, fontWeight: "bold", textAlignVertical: "center"}}>New Stories</Text>
+          
+        </View>
+      </TouchableNativeFeedback>
     </View>
   );
 }

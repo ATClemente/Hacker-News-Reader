@@ -15,19 +15,32 @@ export async function getTopStories(){
     catch(e){
         console.log(e);
     }
-
-
 };
 
 export async function getBestStories(){
     let endPointURl = URLS.HN_API + "/beststories.json"
 
     try{
-        let topStories = await axios({
+        let bestStories = await axios({
             method: 'get',
             url: endPointURl
         });
-        return topStories.data;
+        return bestStories.data;
+    }
+    catch(e){
+        console.log(e);
+    }
+};
+
+export async function getNewStories(){
+    let endPointURl = URLS.HN_API + "/newstories.json"
+
+    try{
+        let newStories = await axios({
+            method: 'get',
+            url: endPointURl
+        });
+        return newStories.data;
     }
     catch(e){
         console.log(e);

@@ -138,6 +138,10 @@ export default class News extends React.Component<NewsProps, NewsState>{
         if(this.props.newsType === "best"){
             return "Best Stories";
         }
+
+        if(this.props.newsType === "new"){
+            return "New Stories";
+        }
     }
 
     hideItem = (index: number) => {
@@ -165,6 +169,9 @@ export default class News extends React.Component<NewsProps, NewsState>{
         }
         else if(this.props.newsType === "best"){
             data = await HN_Util.getBestStories();
+        }
+        else if(this.props.newsType === "new"){
+            data = await HN_Util.getNewStories();
         }
 
         let itemData = [];
