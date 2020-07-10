@@ -12,7 +12,7 @@ type ItemProps = {
     index: number,
     hideItem: Function,
     read: boolean,
-    openItemModal: Function
+    navigation: any
 }
 
 type ItemState = {
@@ -129,7 +129,7 @@ export default class Item extends React.PureComponent<ItemProps, ItemState>{
                     <Text>Vote Up</Text>
                 </View>
 
-                <TouchableOpacity onPress={() => {this.props.openItemModal(this.state.itemData)}}>
+                <TouchableOpacity onPress={() => {this.props.navigation.navigate('Thread', {itemData: this.state.itemData})}}>
                     <View style={{alignItems: "center"}}>
                         <Feather name="message-square" size={24} color="black" />
                         <Text>Comments</Text>
@@ -209,7 +209,7 @@ export default class Item extends React.PureComponent<ItemProps, ItemState>{
             WebBrowser.openBrowserAsync(itemData.url);
         }
         else if(!!itemData.text){
-            this.props.openItemModal(this.state.itemData)
+            this.props.navigation.navigate('Thread', {itemData: this.state.itemData});
         }
         StorageService.addReadItem(itemData.id);
         this.setState({hasBeenRead: true});

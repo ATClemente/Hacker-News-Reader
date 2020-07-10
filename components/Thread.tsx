@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, FlatList, ActivityIndicator, RefreshControl, Dimensions, TouchableOpacity, Modal } from 'react-native';
+import { StyleSheet, Text, View, FlatList, Dimensions, ActivityIndicator, TouchableOpacity, ScrollView, TouchableNativeFeedback, RefreshControl } from 'react-native';
 import * as StorageService from "../services/StorageService";
 import { Feather } from '@expo/vector-icons';
 import HTML from 'react-native-render-html';
@@ -8,16 +8,16 @@ import * as HN_Util from './HackerNewsAPIUtil';
 import Item from './Item';
 import Comment from './Comment';
 
-type ItemModalProps = {
-    visible: boolean,
-    setVisible: Function,
+type ThreadProps = {
+    //visible: boolean,
+    //setVisible: Function,
     itemData: any,
+    navigation: any
 }
 
-type ItemModalState = {
+type ThreadState = {
     dataLoading: boolean,
     itemData: any,
-    showItemModal: boolean,
     kidIds: number[],
     kidData: any[],
     startSlice: number,
@@ -27,22 +27,26 @@ let loadDataBatch = true;
 
 const {width, height} = Dimensions.get('window');
 
-export default class ItemModal extends React.Component<ItemModalProps, ItemModalState>{
-    constructor(props: ItemModalProps){
+export default class Thread extends React.Component<ThreadProps, ThreadState>{
+    constructor(props: ThreadProps){
         super(props)
 
         this.state = {
             dataLoading: true,
             itemData: null,
-            showItemModal: false,
             kidIds: [],
             kidData: [],
             startSlice: 0,
         }
-
     }
 
-    async componentDidUpdate(prevProps: ItemModalProps){
+    async componentDidMount(){
+        let itemData = await HN_Util.getItem(this.props.itemData.id);
+        await this.setState({itemData: itemData, kidIds: itemData.kids});
+        this.loadCommentData();
+    }
+
+    /*async componentDidUpdate(prevProps: ThreadProps){
         if(prevProps.visible !== this.props.visible){
             await this.setState({showItemModal: this.props.visible});
             if(this.state.showItemModal){
@@ -54,17 +58,12 @@ export default class ItemModal extends React.Component<ItemModalProps, ItemModal
                 this.setState({itemData: null, kidData: [], kidIds: []});
             }
         }
-    }
+    }*/
 
     render(){
         return(
-            <Modal
-                animationType="fade"
-                transparent={ false }
-                visible={ this.state.showItemModal }
-                onRequestClose={() => { this.props.setVisible(false) }}
-                statusBarTranslucent={false}
-            >
+            <React.Fragment>
+                <View style={{marginTop: 24}}></View>
                 {this.state.itemData &&
                     <FlatList
                         style={{backgroundColor: "#D3D3D3"}}
@@ -89,8 +88,6 @@ export default class ItemModal extends React.Component<ItemModalProps, ItemModal
                         onEndReachedThreshold={0.5}
                     
                     />
-
-
                 }
 
                 {!this.state.itemData &&
@@ -102,7 +99,7 @@ export default class ItemModal extends React.Component<ItemModalProps, ItemModal
                     </View>
                 }
 
-            </Modal>
+            </React.Fragment>
         );
     }
 
@@ -115,7 +112,7 @@ export default class ItemModal extends React.Component<ItemModalProps, ItemModal
         return(
             <View style={{minHeight: 200, width: width, backgroundColor: "rgb(255, 102, 0)", justifyContent:"space-between"}}>
                 <View style={{flexDirection: "row"}}>
-                    <TouchableOpacity onPress={() => { this.props.setVisible(false) }}>
+                    <TouchableOpacity onPress={() => { this.props.navigation.goBack() }}>
                         <Feather name="arrow-left" size={24} color="black" />
                     </TouchableOpacity>
                 </View>

@@ -5,18 +5,20 @@ import React, { useState, useEffect, Ref }  from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, DrawerLayoutAndroid, TouchableNativeFeedback, BackHandler, Alert } from 'react-native';
 
 import Profile from './components/Profile';
+import Thread from './components/Thread';
 
 import { NavigationContainer, useFocusEffect } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 const Stack = createStackNavigator();
 
 import News from './components/News';
+import { ForceTouchGestureHandler } from 'react-native-gesture-handler';
 
 
 let drawerRef: React.RefObject<DrawerLayoutAndroid> = React.createRef();
 
 
-function NewsScreen({navigation} : {navigation:any}){
+function NewsScreen({route, navigation}: {route:any, navigation:any}){
   /*useEffect(() => {
     const backAction = () => {
       Alert.alert("", "Are you sure you want to close?", [
@@ -79,7 +81,7 @@ function NewsScreen({navigation} : {navigation:any}){
           renderNavigationView={()=>navigationView(setNewsMode, drawerRef, navigation)}
           drawerWidth={250}
         >
-          <News newsType={newsMode}/>
+          <News newsType={newsMode} navigation={navigation}/>
         </DrawerLayoutAndroid>
       </View>
     );
@@ -92,14 +94,24 @@ function ProfileScreen({route, navigation}: {route:any, navigation:any}) {
   );
 }
 
+function ThreadScreen({route, navigation}: {route:any, navigation:any}) {
+  console.log(route.params.itemData);
+  return (
+    <Thread itemData={route.params.itemData} navigation={navigation} />
+  );
+}
+
 
 export default function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator
+        initialRouteName="News"
+      >
         <Stack.Screen options={{headerShown:false}} name="News" component={NewsScreen} />
         <Stack.Screen options={{headerShown:false}} name="Profile" component={ProfileScreen} />
+        <Stack.Screen options={{headerShown:false}} name="Thread" component={ThreadScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

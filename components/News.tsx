@@ -4,10 +4,10 @@ import * as StorageService from "../services/StorageService";
 
 import * as HN_Util from './HackerNewsAPIUtil';
 import Item from './Item';
-import ItemModal from './ItemModal';
 
 type NewsProps = {
-    newsType: string
+    newsType: string,
+    navigation: any
 }
 
 type NewsState = {
@@ -17,8 +17,6 @@ type NewsState = {
     startSlice: number,
     dataLoading: boolean,
     readItems: number[],
-    showItemModal: boolean,
-    selectedItem: any
 }
 
 let loadDataBatch = true;
@@ -36,8 +34,6 @@ export default class News extends React.Component<NewsProps, NewsState>{
             itemIDs: [],
             readItems: [],
             dataLoading: true,
-            showItemModal: false,
-            selectedItem: {}
         }
 
     }
@@ -91,21 +87,14 @@ export default class News extends React.Component<NewsProps, NewsState>{
                         onEndReached={this.loadNextBatch}
                         onEndReachedThreshold={0.5}
                     />
-                    <ItemModal
-                        visible={ this.state.showItemModal }
-                        setVisible={ (vis: boolean) => { this.setModalVisible(vis) }}
-                        itemData={this.state.selectedItem}
-                    >
-                    </ItemModal>
                 </React.Fragment>
-
             );
         }
     }
 
     _renderItem = ({item, index} : {item: any, index: number}) => {
         return(
-            <Item itemData={item} index={index} hideItem={this.hideItem} read={this.state.readItems.includes(item.id)} openItemModal={this.showItemModal}/>
+            <Item itemData={item} index={index} hideItem={this.hideItem} read={this.state.readItems.includes(item.id)} navigation={this.props.navigation} />
         );
     }
 
@@ -150,14 +139,6 @@ export default class News extends React.Component<NewsProps, NewsState>{
         temp.splice(index, 1);
 
         this.setState({newsData: temp});
-    }
-    
-    showItemModal = (item: any) => {
-        this.setState({showItemModal: true, selectedItem: item});
-    }
-
-    setModalVisible = (visible: boolean) => {
-        this.setState({showItemModal: visible});
     }
 
 
