@@ -44,9 +44,10 @@ export default class News extends React.Component<NewsProps, NewsState>{
         this.loadInitialData();
     }
 
-    componentDidUpdate(prevProps: NewsProps){
+    async componentDidUpdate(prevProps: NewsProps){
         if(this.props.newsType !== prevProps.newsType){
-            this.setState({newsData: []});
+            let readItems = await StorageService.getReadItems();
+            await this.setState({readItems: readItems, newsData: []});
             this.loadInitialData();
         }
     }

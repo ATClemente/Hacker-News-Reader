@@ -90,12 +90,11 @@ function NewsScreen({route, navigation}: {route:any, navigation:any}){
 
 function ProfileScreen({route, navigation}: {route:any, navigation:any}) {
   return (
-    <Profile userId={route.params.userId} />
+    <Profile userId={route.params.userId} navigation={navigation} />
   );
 }
 
 function ThreadScreen({route, navigation}: {route:any, navigation:any}) {
-  console.log(route.params.itemData);
   return (
     <Thread itemData={route.params.itemData} navigation={navigation} />
   );
@@ -144,7 +143,7 @@ function navigationView(setNewsMode: Function, drawer: any, navigation: any){
       </TouchableNativeFeedback>
 
 
-      <TouchableNativeFeedback onPress={() => {navigation.navigate('Profile',{userId:15})}}>
+      <TouchableNativeFeedback onPress={() => {navigation.navigate('Profile',{userId:'jl'})}}>
         <View style={{flexDirection: "row", height: 60}}>
           <Text style={{fontSize: 20, fontWeight: "bold", textAlignVertical: "center"}}>Testing</Text>
           

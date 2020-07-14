@@ -63,7 +63,7 @@ export default class Thread extends React.Component<ThreadProps, ThreadState>{
     render(){
         return(
             <React.Fragment>
-                <View style={{marginTop: 24}}></View>
+                <View style={{marginTop: 28}}></View>
                 {this.state.itemData &&
                     <FlatList
                         style={{backgroundColor: "#D3D3D3"}}
@@ -104,16 +104,20 @@ export default class Thread extends React.Component<ThreadProps, ThreadState>{
     }
 
     _renderItem = ({item, index} : {item: any, index: number}) => {
-        return(<Comment commentData={item} threadLevel={0}/>);
+        return(<Comment commentData={item} threadLevel={0} navigation={this.props.navigation}/>);
     }
 
     _renderListHeader = () => {
-        const { itemData } = this.props;
+        const { itemData } = this.state;
         return(
             <View style={{minHeight: 200, width: width, backgroundColor: "rgb(255, 102, 0)", justifyContent:"space-between"}}>
-                <View style={{flexDirection: "row"}}>
+                <View style={{flexDirection: "row", justifyContent:"space-between"}}>
                     <TouchableOpacity onPress={() => { this.props.navigation.goBack() }}>
                         <Feather name="arrow-left" size={24} color="black" />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity onPress={() => { this.props.navigation.navigate("Profile", {userId: itemData.by}) }}>
+                        <Feather name="user" size={24} color="black" />
                     </TouchableOpacity>
                 </View>
                 <View>
@@ -189,7 +193,7 @@ export default class Thread extends React.Component<ThreadProps, ThreadState>{
             let subIds = data.slice(this.state.startSlice, this.state.startSlice + 20)
             for(let i in subIds){
                 let newData = await HN_Util.getItem(subIds[i]);
-                if(!!newData.text){
+                if(!!newData && !!newData.text){
                     kidData.push(newData);
                 }
             }
@@ -212,7 +216,7 @@ export default class Thread extends React.Component<ThreadProps, ThreadState>{
         let subIds = this.state.itemData.kids.slice(this.state.startSlice, this.state.startSlice + 20);
         for(let i in subIds){
             let newData = await HN_Util.getItem(subIds[i]);
-            if(!!newData.text){
+            if(!!newData && !!newData.text){
                 kidData.push(newData);
             }
         }

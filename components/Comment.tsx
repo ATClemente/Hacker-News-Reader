@@ -12,6 +12,7 @@ import Styles from '../constants/Styles';
 type CommentProps = {
     commentData: any,
     threadLevel: number,
+    navigation: any
 }
 
 type CommentState = {
@@ -98,7 +99,7 @@ export default class Comment extends React.PureComponent<CommentProps, CommentSt
     }
 
     _renderItem = ({item, index} : {item: any, index: number}) => {
-        return(<Comment commentData={item} threadLevel={this.props.threadLevel + 1}/>);
+        return(<Comment commentData={item} threadLevel={this.props.threadLevel + 1} navigation={this.props.navigation}/>);
     }
 
     loadChildCommentData = async () => {
@@ -110,7 +111,7 @@ export default class Comment extends React.PureComponent<CommentProps, CommentSt
             //let subIds = data.slice(this.state.startSlice, this.state.startSlice + 20)
             for(let i in data){
                 let newData = await HN_Util.getItem(data[i]);
-                if(!!newData.text){
+                if(!!newData && !!newData.text){
                     kidData.push(newData);
                 }
             }
@@ -151,8 +152,13 @@ export default class Comment extends React.PureComponent<CommentProps, CommentSt
 
     renderCommentControls = (data: any) => {
         return(
-            <View style={styles.itemCard}>
-                <Text>Test!!!</Text>
+            <View style={styles.controlsCard}>
+                <TouchableOpacity onPress={() => {this.props.navigation.navigate('Profile', {userId: this.props.commentData.by})}}>
+                    <View style={{alignItems: "center"}}>
+                        <Feather name="user" size={24} color="black" />
+                        <Text>User</Text>
+                    </View>
+                </TouchableOpacity>
             </View>
         );
     }
@@ -214,24 +220,14 @@ const styles = StyleSheet.create({
         //flexDirection: "row"
     },
     controlsCard:{
-        width: width - 14,
-        marginLeft: 7,
-        marginRight: 7,
-        borderRadius: 5,
+        width: width,
         minHeight: 100,
         backgroundColor: "white",
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.20,
-        shadowRadius: 1.41,
-
-        elevation: 3,
         flexDirection: "row",
         alignItems: 'center',
         justifyContent: 'space-around',
+        borderBottomWidth: 1,
+        borderBottomColor: "#D3D3D3"
     },
     scoreStyle:{
         fontSize: 16,

@@ -61,3 +61,18 @@ export async function getItem(id: number){
         console.log(e);
     }
 }
+
+export async function getProfile(user: string){
+    let endPointURl = URLS.HN_API + "/user/" + user + ".json";
+
+    try{
+        let profileData = await axios({
+            method: 'get',
+            url: endPointURl
+        });
+        return profileData.data;
+    }
+    catch(e){
+        console.log(e);
+    }
+}

@@ -42,9 +42,9 @@ export default class Item extends React.PureComponent<ItemProps, ItemState>{
     }
 
     async componentDidUpdate(prevProps: ItemProps, prevState: ItemState){
-        /*if(prevProps.itemData.descendants !== this.props.itemData.descendants){
+        if(prevProps.itemData.descendants !== this.props.itemData.descendants || prevProps.itemData.score !== this.props.itemData.score ){
             this.setState({itemData: this.props.itemData});
-        }*/
+        }
         //let data = await HN_Util.getItem(this.props.itemID);
 
         /*if(!!prevState.itemData){
@@ -56,11 +56,12 @@ export default class Item extends React.PureComponent<ItemProps, ItemState>{
         //if(prevState.itemData.descendants !== data.descendants){
         //    this.setState({itemData: data});
         //}
+
     }
 
 
     render(){
-        if(!this.props.itemData){
+        if(!this.state.itemData){
             return(
                 <View style={[styles.itemCard, {justifyContent: "center"}]}>
                     <ActivityIndicator size={"large"}/>
@@ -75,8 +76,8 @@ export default class Item extends React.PureComponent<ItemProps, ItemState>{
                     showsHorizontalScrollIndicator={false}
                     decelerationRate={"fast"}
                 >
-                    {this.renderInfoCard(this.props.itemData)}
-                    {this.renderControls(this.props.itemData)}
+                    {this.renderInfoCard(this.state.itemData)}
+                    {this.renderControls(this.state.itemData)}
                 </ScrollView>
             );
 
@@ -84,11 +85,20 @@ export default class Item extends React.PureComponent<ItemProps, ItemState>{
     }
 
     renderInfoCard = (itemData: any) => {
+        const itemNumberJustify = itemData.type === "job" ? 'flex-end' : 'center';
         return(
             <TouchableNativeFeedback onPress={() => {this.viewItem(itemData)}}>
                 <View style={styles.itemCard}>
                         <View style={{flex:1, backgroundColor: "rgb(255, 212, 184)", borderColor: "rgb(255, 212, 184)", borderRightWidth: 1, alignItems: "center", justifyContent: "center"}}>
-                            <Text style={{textAlignVertical: "center"}}>{this.props.index+1}</Text>
+                            <View style={{flex:1}}/>
+                            <View style={{flex:1, justifyContent:itemNumberJustify}}>
+                                <Text style={{textAlignVertical: "center"}}>{this.props.index+1}</Text>
+                            </View>
+                            <View style={{flex:1,justifyContent:'flex-end'}}>
+                                {itemData.type === "job" &&
+                                    <Feather name="briefcase" size={24} color="black" />
+                                }
+                            </View>
                         </View>
                         <View style={{flex: 9, padding: 5, justifyContent:"space-between"}}>
                             <View style={{flexDirection: "row"}}>
@@ -99,7 +109,7 @@ export default class Item extends React.PureComponent<ItemProps, ItemState>{
                                     <Text style={{fontSize: 16, textAlignVertical: "center", marginRight: 10}}>-</Text>
                                     <Text style={{textAlignVertical: "center", marginRight: 10}}>{this.calcTime(itemData.time)}</Text>
                                     <Text style={{fontSize: 16, textAlignVertical: "center", marginRight: 10}}>-</Text>
-                                    <Text style={{textAlignVertical: "center", marginRight: 10}}>{itemData.descendants} comments</Text>
+                                    <Text style={{textAlignVertical: "center", marginRight: 10}}>{itemData.descendants} comment{itemData.descendants === 1 ? '' : 's'}</Text>
                                 </View>
                                 
                                 { this.state.hasBeenRead &&
