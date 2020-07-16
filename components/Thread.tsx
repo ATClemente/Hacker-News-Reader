@@ -116,12 +116,18 @@ export default class Thread extends React.Component<ThreadProps, ThreadState>{
                         <Feather name="arrow-left" size={24} color="black" />
                     </TouchableOpacity>
 
-                    <TouchableOpacity onPress={() => { this.props.navigation.navigate("Profile", {userId: itemData.by}) }}>
+                    <TouchableOpacity onPress={() => { this.props.navigation.push("Profile", {userId: itemData.by}) }}>
                         <Feather name="user" size={24} color="black" />
                     </TouchableOpacity>
                 </View>
                 <View>
-                    <Text style={{textAlignVertical: "center", fontSize: 20, fontWeight:"bold", marginLeft: 10, marginRight: 10}}>{itemData.title}</Text>
+                    {!!itemData.title &&
+                        <Text style={{textAlignVertical: "center", fontSize: 20, fontWeight:"bold", marginLeft: 10, marginRight: 10}}>{itemData.title}</Text>
+                    }
+                    {!itemData.title &&
+                        <Text style={{textAlignVertical: "center", fontSize: 20, fontWeight:"bold", marginLeft: 10, marginRight: 10}}>Comment Thread</Text>
+                    }
+                    
                 </View>
                 <View style={{justifyContent:"space-between"}}>
                     {!!itemData.url &&
@@ -135,13 +141,21 @@ export default class Thread extends React.Component<ThreadProps, ThreadState>{
                         </View>
                     }
 
-                    <View style={{flexDirection:"row"}}>
+                    <View style={{flexDirection:"row", marginLeft: 10, marginBottom: 2}}>
                         <Text>{itemData.by}</Text>
                         <Text> - </Text>
-                        <Text>{itemData.score}</Text>
-                        <Text> - </Text>
-                        <Text>{itemData.descendants} comments</Text>
-                        <Text> - </Text>
+                        {itemData.score &&
+                        <React.Fragment>
+                            <Text>{itemData.score}</Text>
+                            <Text> - </Text>
+                        </React.Fragment>
+                        }
+                        {itemData.descendants &&
+                        <React.Fragment>
+                            <Text>{itemData.descendants} comments</Text>
+                            <Text> - </Text>
+                        </React.Fragment>
+                        }
                         <Text>{this.calcTime(itemData.time)}</Text>
                     </View>   
                 </View>   

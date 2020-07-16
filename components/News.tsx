@@ -137,6 +137,10 @@ export default class News extends React.Component<NewsProps, NewsState>{
     hideItem = (index: number) => {
         let temp = this.state.newsData.slice();
 
+        let itemId = temp[index].id;
+
+        StorageService.addHiddenItem(itemId);
+
         temp.splice(index, 1);
 
         this.setState({newsData: temp});
@@ -156,11 +160,15 @@ export default class News extends React.Component<NewsProps, NewsState>{
             data = await HN_Util.getNewStories();
         }
 
+        let hiddenItems = await StorageService.getHiddenItems();
+
         let itemData = [];
         let subIds = data.slice(this.state.startSlice, this.state.startSlice + 20)
         for(let i in subIds){
-            let newData = await HN_Util.getItem(subIds[i]);
-            itemData.push(newData);
+            if(!hiddenItems.includes(subIds[i])){
+                let newData = await HN_Util.getItem(subIds[i]);
+                itemData.push(newData);
+            }
         }
 
 
@@ -176,11 +184,17 @@ export default class News extends React.Component<NewsProps, NewsState>{
         if(this.state.startSlice > this.state.itemIDs.length-1){
             return;
         }
+
+        let hiddenItems = await StorageService.getHiddenItems();
+
         let itemData = [];
         let subIds = this.state.itemIDs.slice(this.state.startSlice, this.state.startSlice + 20)
         for(let i in subIds){
-            let newData = await HN_Util.getItem(subIds[i]);
-            itemData.push(newData);
+            if(!hiddenItems.includes(subIds[i])){
+                let newData = await HN_Util.getItem(subIds[i]);
+                itemData.push(newData);
+            }
+
         }
 
 
@@ -191,6 +205,10 @@ export default class News extends React.Component<NewsProps, NewsState>{
         //console.log([...this.state.newsData, itemData]);
         await this.setState({newsData: [...this.state.newsData, ...itemData], startSlice: this.state.startSlice + 20, dataLoading: false});
         loadDataBatch = true;
+    }
+
+    refTest = () => {
+        console.log("in the news componen");
     }
 
 }

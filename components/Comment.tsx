@@ -153,7 +153,7 @@ export default class Comment extends React.PureComponent<CommentProps, CommentSt
     renderCommentControls = (data: any) => {
         return(
             <View style={styles.controlsCard}>
-                <TouchableOpacity onPress={() => {this.props.navigation.navigate('Profile', {userId: this.props.commentData.by})}}>
+                <TouchableOpacity onPress={() => {this.props.navigation.push('Profile', {userId: this.props.commentData.by})}}>
                     <View style={{alignItems: "center"}}>
                         <Feather name="user" size={24} color="black" />
                         <Text>User</Text>

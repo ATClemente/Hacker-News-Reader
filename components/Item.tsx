@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, View, FlatList, Dimensions, ActivityIndicator, TouchableOpacity, ScrollView, TouchableNativeFeedback } from 'react-native';
+import { StyleSheet, Text, View, FlatList, Dimensions, ActivityIndicator, TouchableOpacity, ScrollView, TouchableNativeFeedback, TouchableWithoutFeedbackBase } from 'react-native';
+import Menu, { MenuItem, MenuDivider } from 'react-native-material-menu';
 import * as HN_Util from './HackerNewsAPIUtil';
 import * as WebBrowser from 'expo-web-browser';
 import { Feather } from '@expo/vector-icons';
@@ -20,10 +21,19 @@ type ItemState = {
     hasBeenRead: boolean,
 }
 
+export interface ItemStuff {
+    name: string;
+    age: number;
+}
+
 
 const {width, height} = Dimensions.get('window');
 
-export default class Item extends React.PureComponent<ItemProps, ItemState>{
+//let menuRef: React.RefObject<Menu>[] = React.createRef<Menu[]>();
+
+export default class Item extends React.PureComponent<ItemProps, ItemState, {name: string}>{
+
+    menuRefs: any[] = [];
     constructor(props: ItemProps){
         super(props)
 
@@ -31,6 +41,7 @@ export default class Item extends React.PureComponent<ItemProps, ItemState>{
             itemData: null,
             hasBeenRead: false
         }
+        
     }
 
     async componentDidMount(){
@@ -77,7 +88,7 @@ export default class Item extends React.PureComponent<ItemProps, ItemState>{
                     decelerationRate={"fast"}
                 >
                     {this.renderInfoCard(this.state.itemData)}
-                    {this.renderControls(this.state.itemData)}
+                    {this.renderControls(this.state.itemData, this.props.index)}
                 </ScrollView>
             );
 
@@ -89,49 +100,49 @@ export default class Item extends React.PureComponent<ItemProps, ItemState>{
         return(
             <TouchableNativeFeedback onPress={() => {this.viewItem(itemData)}}>
                 <View style={styles.itemCard}>
-                        <View style={{flex:1, backgroundColor: "rgb(255, 212, 184)", borderColor: "rgb(255, 212, 184)", borderRightWidth: 1, alignItems: "center", justifyContent: "center"}}>
-                            <View style={{flex:1}}/>
-                            <View style={{flex:1, justifyContent:itemNumberJustify}}>
-                                <Text style={{textAlignVertical: "center"}}>{this.props.index+1}</Text>
-                            </View>
-                            <View style={{flex:1,justifyContent:'flex-end'}}>
-                                {itemData.type === "job" &&
-                                    <Feather name="briefcase" size={24} color="black" />
-                                }
-                            </View>
+                    <View style={{flex:1, backgroundColor: "rgb(255, 212, 184)", borderColor: "rgb(255, 212, 184)", borderRightWidth: 1, alignItems: "center", justifyContent: "center"}}>
+                        <View style={{flex:1}}/>
+                        <View style={{flex:1, justifyContent:itemNumberJustify}}>
+                            <Text style={{textAlignVertical: "center"}}>{this.props.index+1}</Text>
                         </View>
-                        <View style={{flex: 9, padding: 5, justifyContent:"space-between"}}>
-                            <View style={{flexDirection: "row"}}>
-                                <View style={{flexDirection:"row", flexWrap:"wrap"}}>
-                                    <Text style={styles.scoreStyle}>{itemData.score}</Text>
-                                    <Text style={{fontSize: 16, textAlignVertical: "center", marginRight: 10}}>-</Text>
-                                    <Text style={{textAlignVertical: "center", marginRight: 10}}>{itemData.by}</Text>
-                                    <Text style={{fontSize: 16, textAlignVertical: "center", marginRight: 10}}>-</Text>
-                                    <Text style={{textAlignVertical: "center", marginRight: 10}}>{this.calcTime(itemData.time)}</Text>
-                                    <Text style={{fontSize: 16, textAlignVertical: "center", marginRight: 10}}>-</Text>
-                                    <Text style={{textAlignVertical: "center", marginRight: 10}}>{itemData.descendants} comment{itemData.descendants === 1 ? '' : 's'}</Text>
-                                </View>
-                                
-                                { this.state.hasBeenRead &&
-                                    <React.Fragment>
-                                        <View style={{flex:1}}/>
-                                        <Feather name="book-open" size={24} color="black" />
-                                    </React.Fragment>
-                                }
-                            </View>
-                            <View style={{flexDirection: "row"}}>
-                                <Text style={styles.titleText}>{itemData.title}</Text>
-                            </View>
-                            <View style={{flexDirection: "row", opacity: 0.5}}>
-                                <Text style={styles.urlText}>{itemData.url}</Text>
-                            </View>
+                        <View style={{flex:1,justifyContent:'flex-end'}}>
+                            {itemData.type === "job" &&
+                                <Feather name="briefcase" size={24} color="black" />
+                            }
                         </View>
+                    </View>
+                    <View style={{flex: 9, padding: 5, justifyContent:"space-between"}}>
+                        <View style={{flexDirection: "row"}}>
+                            <View style={{flexDirection:"row", flexWrap:"wrap"}}>
+                                <Text style={styles.scoreStyle}>{itemData.score}</Text>
+                                <Text style={{fontSize: 16, textAlignVertical: "center", marginRight: 10}}>-</Text>
+                                <Text style={{textAlignVertical: "center", marginRight: 10}}>{itemData.by}</Text>
+                                <Text style={{fontSize: 16, textAlignVertical: "center", marginRight: 10}}>-</Text>
+                                <Text style={{textAlignVertical: "center", marginRight: 10}}>{this.calcTime(itemData.time)}</Text>
+                                <Text style={{fontSize: 16, textAlignVertical: "center", marginRight: 10}}>-</Text>
+                                <Text style={{textAlignVertical: "center", marginRight: 10}}>{itemData.descendants} comment{itemData.descendants === 1 ? '' : 's'}</Text>
+                            </View>
+                            
+                            { this.state.hasBeenRead &&
+                                <React.Fragment>
+                                    <View style={{flex:1}}/>
+                                    <Feather name="book-open" size={24} color="black" />
+                                </React.Fragment>
+                            }
+                        </View>
+                        <View style={{flexDirection: "row"}}>
+                            <Text style={styles.titleText}>{itemData.title}</Text>
+                        </View>
+                        <View style={{flexDirection: "row", opacity: 0.5}}>
+                            <Text style={styles.urlText}>{itemData.url}</Text>
+                        </View>
+                    </View>
                 </View>
             </TouchableNativeFeedback>
         );
     }
 
-    renderControls = (itemData: any) => {
+    renderControls = (itemData: any, index: number) => {
         return(
             <View style={styles.controlsCard}>
                 <View style={{alignItems: "center"}}>
@@ -139,7 +150,7 @@ export default class Item extends React.PureComponent<ItemProps, ItemState>{
                     <Text>Vote Up</Text>
                 </View>
 
-                <TouchableOpacity onPress={() => {this.props.navigation.navigate('Thread', {itemData: this.state.itemData})}}>
+                <TouchableOpacity onPress={() => {this.props.navigation.push('Thread', {itemData: this.state.itemData})}}>
                     <View style={{alignItems: "center"}}>
                         <Feather name="message-square" size={24} color="black" />
                         <Text>Comments</Text>
@@ -163,14 +174,39 @@ export default class Item extends React.PureComponent<ItemProps, ItemState>{
                     <Text>Save</Text>
                 </View>
 
-                <View style={{alignItems: "center"}}>
-                    <Feather name="more-vertical" size={24} color="black" />
-                    <Text>More</Text>
-                </View>
+                <Menu
+                    ref={(ref: any) =>this.menuRefs[index] = ref}
+                    button={
+                        <TouchableOpacity onPress={() => this.showMenu(index)}>
+                        <View style={{alignItems: "center"}}>
+                            <Feather name="more-vertical" size={24} color="black" />
+                            <Text>More</Text>
+                            </View>
+                        </TouchableOpacity>
+                    }
+                >
+                    <MenuItem onPress={() => {
+                        this.hideMenu(index);
+                        this.props.navigation.push('Profile', {userId: this.state.itemData.by});
+                    }}>
+                        <Feather name="user" size={20} color="black" /> <Text style={{textAlignVertical: "center"}}>{itemData.by}</Text>
+                    </MenuItem>
+                    <MenuItem onPress={() => this.hideMenu(index)}>Menu item 2</MenuItem>
+                </Menu>
+
 
                 
             </View>
         );
+    }
+
+    showMenu = (index: number) => {
+        this.menuRefs[index].show();
+    }
+
+    hideMenu = (index: number) => {
+        console.log(this.state.itemData.by);
+        this.menuRefs[index].hide();
     }
 
 
@@ -219,7 +255,7 @@ export default class Item extends React.PureComponent<ItemProps, ItemState>{
             WebBrowser.openBrowserAsync(itemData.url);
         }
         else if(!!itemData.text){
-            this.props.navigation.navigate('Thread', {itemData: this.state.itemData});
+            this.props.navigation.push('Thread', {itemData: this.state.itemData});
         }
         StorageService.addReadItem(itemData.id);
         this.setState({hasBeenRead: true});

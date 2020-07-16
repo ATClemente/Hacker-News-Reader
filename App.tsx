@@ -3,6 +3,7 @@ import * as Font from 'expo-font';
 import { Feather } from '@expo/vector-icons';
 import React, { useState, useEffect, Ref }  from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, DrawerLayoutAndroid, TouchableNativeFeedback, BackHandler, Alert } from 'react-native';
+import * as StorageService from "./services/StorageService";
 
 import Profile from './components/Profile';
 import Thread from './components/Thread';
@@ -16,7 +17,7 @@ import { ForceTouchGestureHandler } from 'react-native-gesture-handler';
 
 
 let drawerRef: React.RefObject<DrawerLayoutAndroid> = React.createRef();
-
+let newsRef: React.RefObject<News> = React.createRef();
 
 function NewsScreen({route, navigation}: {route:any, navigation:any}){
   /*useEffect(() => {
@@ -81,7 +82,7 @@ function NewsScreen({route, navigation}: {route:any, navigation:any}){
           renderNavigationView={()=>navigationView(setNewsMode, drawerRef, navigation)}
           drawerWidth={250}
         >
-          <News newsType={newsMode} navigation={navigation}/>
+          <News ref={newsRef} newsType={newsMode} navigation={navigation}/>
         </DrawerLayoutAndroid>
       </View>
     );
@@ -146,6 +147,20 @@ function navigationView(setNewsMode: Function, drawer: any, navigation: any){
       <TouchableNativeFeedback onPress={() => {navigation.navigate('Profile',{userId:'jl'})}}>
         <View style={{flexDirection: "row", height: 60}}>
           <Text style={{fontSize: 20, fontWeight: "bold", textAlignVertical: "center"}}>Testing</Text>
+          
+        </View>
+      </TouchableNativeFeedback>
+
+      <TouchableNativeFeedback onPress={() => {StorageService.clearReadItems()}}>
+        <View style={{flexDirection: "row", height: 60}}>
+          <Text style={{fontSize: 20, fontWeight: "bold", textAlignVertical: "center"}}>Clear Read Items</Text>
+          
+        </View>
+      </TouchableNativeFeedback>
+
+      <TouchableNativeFeedback onPress={() => {newsRef.current?.refTest(); StorageService.clearHiddenItems()}}>
+        <View style={{flexDirection: "row", height: 60}}>
+          <Text style={{fontSize: 20, fontWeight: "bold", textAlignVertical: "center"}}>Clear Hidden Items</Text>
           
         </View>
       </TouchableNativeFeedback>
