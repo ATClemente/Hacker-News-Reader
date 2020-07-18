@@ -104,7 +104,7 @@ export default class Thread extends React.Component<ThreadProps, ThreadState>{
     }
 
     _renderItem = ({item, index} : {item: any, index: number}) => {
-        return(<Comment commentData={item} threadLevel={0} navigation={this.props.navigation}/>);
+        return(<Comment commentData={item} threadLevel={0} navigation={this.props.navigation} originalPoster={this.state.itemData.by}/>);
     }
 
     _renderListHeader = () => {
@@ -150,7 +150,7 @@ export default class Thread extends React.Component<ThreadProps, ThreadState>{
                             <Text> - </Text>
                         </React.Fragment>
                         }
-                        {itemData.descendants &&
+                        {itemData.descendants !== undefined &&
                         <React.Fragment>
                             <Text>{itemData.descendants} comments</Text>
                             <Text> - </Text>

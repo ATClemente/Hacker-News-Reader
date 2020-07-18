@@ -146,8 +146,10 @@ export default class Profile extends React.Component<ProfileProps, ProfileState>
                     </View>
                 }
 
-                <View style={{marginLeft:5, marginBottom: 2, alignSelf: "flex-start", justifyContent:"flex-end"}}>
+                <View style={{width: '100%', marginLeft:5, marginBottom: 2, flexDirection: "row", alignItems: 'center', justifyContent: 'space-between'}}>
                     <Text style={{textAlignVertical: "bottom", fontStyle:"italic", fontSize: 16}}>{this.state.totalSubmissions} submissions</Text>
+
+                    <Text style={{paddingRight: 10, textAlignVertical: "bottom", fontStyle:"italic", fontSize: 16}}>Joined {this.calcTime(data.created)} ago</Text>
                 </View>
             </View>
         );
@@ -203,6 +205,46 @@ export default class Profile extends React.Component<ProfileProps, ProfileState>
         let cs = this.state.commentSubmissions;
         let ps = this.state.pollSubmissions;
         return `${ss} ${ss === 1 ? 'story' : 'stories'}, ${cs} ${cs === 1 ? 'comment' : 'comments'}, ${ps} ${ps === 1 ? 'poll' : 'polls'}`
+    }
+
+    calcTime = (postTime: any): string => {
+        let currentTime = new Date().getTime();
+        
+        let elapsedTime = (currentTime - postTime * 1000) / 1000;
+
+        if(elapsedTime < 60){
+            return Math.floor(elapsedTime) + "sec";
+        }
+
+        elapsedTime /= 60;
+
+        if(elapsedTime < 60){
+            return Math.floor(elapsedTime) + "min";
+        }
+
+        elapsedTime /= 60;
+
+        if(elapsedTime < 24){
+            return Math.floor(elapsedTime) + "hr";
+        }
+
+        elapsedTime /= 24;
+
+        if(elapsedTime < 30){
+            return Math.floor(elapsedTime) + "d";
+        }
+
+        elapsedTime /= 30;
+
+        if(elapsedTime < 12){
+            return Math.floor(elapsedTime) + "mon";
+        }
+
+        elapsedTime /= 12;
+
+
+        return Math.floor(elapsedTime) + "yr";
+        
     }
 }
 

@@ -12,7 +12,8 @@ import Styles from '../constants/Styles';
 type CommentProps = {
     commentData: any,
     threadLevel: number,
-    navigation: any
+    navigation: any,
+    originalPoster: string
 }
 
 type CommentState = {
@@ -99,7 +100,7 @@ export default class Comment extends React.PureComponent<CommentProps, CommentSt
     }
 
     _renderItem = ({item, index} : {item: any, index: number}) => {
-        return(<Comment commentData={item} threadLevel={this.props.threadLevel + 1} navigation={this.props.navigation}/>);
+        return(<Comment commentData={item} threadLevel={this.props.threadLevel + 1} navigation={this.props.navigation} originalPoster={this.props.originalPoster}/>);
     }
 
     loadChildCommentData = async () => {
@@ -128,11 +129,15 @@ export default class Comment extends React.PureComponent<CommentProps, CommentSt
             width: width-(3*threadLevel),
             marginLeft: 3 * threadLevel
         };
+        const authorColor = data.by === this.props.originalPoster ? "white" : "black";
+        const authorBackgroundColor = data.by === this.props.originalPoster ? "orange" : "rgba(255, 255, 255, 0)";
         return(
             <TouchableNativeFeedback onPress={() => {this.setState({showChildComments: !this.state.showChildComments})}}>
                 <View style={[styles.itemCard, customStyles, {borderBottomWidth: 1, borderBottomColor: "#D3D3D3"}]}>
                     <View style={{flexDirection: "row", marginBottom: 5}}>
-                        <Text style={{textAlignVertical: "center"}}>{data.by}</Text>
+                        <View style={{paddingTop: 2, paddingBottom: 2, paddingLeft: 5, paddingRight: 5, marginLeft: -5, borderRadius: 7, backgroundColor: authorBackgroundColor}}>
+                            <Text style={{color: authorColor, textAlignVertical: "center"}}>{data.by}</Text>
+                        </View>
                         <Text style={{textAlignVertical: "center"}}> - </Text>
                         <Text style={{textAlignVertical: "center"}}>{this.calcTime(data.time)}</Text>
                         {!this.state.showChildComments && !!data.kids && data.kids.length > 0 && this.state.childCommentData.length > 0 && 

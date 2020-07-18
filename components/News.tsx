@@ -1,13 +1,15 @@
 import React from 'react';
 import { StyleSheet, Text, View, FlatList, ActivityIndicator, RefreshControl, Dimensions, TouchableOpacity, Modal } from 'react-native';
 import * as StorageService from "../services/StorageService";
-
+import { Feather } from '@expo/vector-icons';
 import * as HN_Util from './HackerNewsAPIUtil';
 import Item from './Item';
+import { TouchableNativeFeedback } from 'react-native-gesture-handler';
 
 type NewsProps = {
     newsType: string,
-    navigation: any
+    navigation: any,
+    drawerRef: any
 }
 
 type NewsState = {
@@ -17,6 +19,7 @@ type NewsState = {
     startSlice: number,
     dataLoading: boolean,
     readItems: number[],
+    savedItems: number[],
 }
 
 let loadDataBatch = true;
@@ -33,6 +36,7 @@ export default class News extends React.Component<NewsProps, NewsState>{
             newsData: [],
             itemIDs: [],
             readItems: [],
+            savedItems: [],
             dataLoading: true,
         }
 
@@ -40,14 +44,16 @@ export default class News extends React.Component<NewsProps, NewsState>{
 
     async componentDidMount(){
         let readItems = await StorageService.getReadItems();
-        await this.setState({readItems: readItems});
+        let savedItems = await StorageService.getSavedItems();
+        await this.setState({readItems: readItems, savedItems: savedItems});
         this.loadInitialData();
     }
 
     async componentDidUpdate(prevProps: NewsProps){
         if(this.props.newsType !== prevProps.newsType){
             let readItems = await StorageService.getReadItems();
-            await this.setState({readItems: readItems, newsData: []});
+            let savedItems = await StorageService.getSavedItems();
+            await this.setState({readItems: readItems, savedItems: savedItems, newsData: []});
             this.loadInitialData();
         }
     }
@@ -72,7 +78,7 @@ export default class News extends React.Component<NewsProps, NewsState>{
                         keyExtractor={(item) => item.id.toString()}
                         data={this.state.newsData}
                         renderItem={this._renderItem}
-                        ItemSeparatorComponent={() => <View style={{marginTop:7}}/>}
+                        ItemSeparatorComponent={this._renderListSeparator}
                         ListHeaderComponent={this._renderListHeader}
                         ListFooterComponent={this._renderListFooter}
                         //initialNumToRender={8}
@@ -95,14 +101,19 @@ export default class News extends React.Component<NewsProps, NewsState>{
 
     _renderItem = ({item, index} : {item: any, index: number}) => {
         return(
-            <Item itemData={item} index={index} hideItem={this.hideItem} read={this.state.readItems.includes(item.id)} navigation={this.props.navigation} />
+            <Item itemData={item} index={index} hideItem={this.hideItem} read={this.state.readItems.includes(item.id)} saved={this.state.savedItems.includes(item.id)} navigation={this.props.navigation} />
         );
     }
 
     _renderListHeader = () => {
         return(
-            <View style={{flexDirection: "row", height: 50, width: width, backgroundColor: "rgb(255, 102, 0)", marginBottom: 10}}>
-                <Text style={{textAlignVertical: "center", fontSize: 20, fontWeight:"bold", marginLeft: 10}}>{this.getHeaderText()}</Text>        
+            <View style={{flexDirection: "row", alignItems: "center", height: 50, width: width, backgroundColor: "rgb(255, 102, 0)", marginBottom: 10}}>
+                <TouchableNativeFeedback onPress={() => this.props.drawerRef.current.openDrawer()}>
+                    <Feather style={{marginLeft: 10}} name="menu" size={24} color="black" />
+                </TouchableNativeFeedback>
+                <Text style={{textAlignVertical: "center", fontSize: 20, fontWeight:"bold", marginLeft: 10}}>
+                     {this.getHeaderText()}
+                </Text>        
             </View>
         );
     }
@@ -120,6 +131,12 @@ export default class News extends React.Component<NewsProps, NewsState>{
         }
     }
 
+    _renderListSeparator = () => {
+        return(
+            <View style={{marginTop:7}}/>
+        );
+    }
+
     getHeaderText = () => {
         if(this.props.newsType === "top"){
             return "Top Stories";
@@ -131,6 +148,10 @@ export default class News extends React.Component<NewsProps, NewsState>{
 
         if(this.props.newsType === "new"){
             return "New Stories";
+        }
+
+        if(this.props.newsType === "saved"){
+            return "Saved Stories";
         }
     }
 
@@ -159,6 +180,9 @@ export default class News extends React.Component<NewsProps, NewsState>{
         else if(this.props.newsType === "new"){
             data = await HN_Util.getNewStories();
         }
+        else if(this.props.newsType === "saved"){
+            data = await StorageService.getSavedItems();
+        }
 
         let hiddenItems = await StorageService.getHiddenItems();
 
@@ -167,7 +191,9 @@ export default class News extends React.Component<NewsProps, NewsState>{
         for(let i in subIds){
             if(!hiddenItems.includes(subIds[i])){
                 let newData = await HN_Util.getItem(subIds[i]);
-                itemData.push(newData);
+                if(!!newData){
+                    itemData.push(newData);
+                }
             }
         }
 
@@ -192,7 +218,9 @@ export default class News extends React.Component<NewsProps, NewsState>{
         for(let i in subIds){
             if(!hiddenItems.includes(subIds[i])){
                 let newData = await HN_Util.getItem(subIds[i]);
-                itemData.push(newData);
+                if(!!newData){
+                    itemData.push(newData);
+                }
             }
 
         }

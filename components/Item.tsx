@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, FlatList, Dimensions, ActivityIndicator, TouchableOpacity, ScrollView, TouchableNativeFeedback, TouchableWithoutFeedbackBase } from 'react-native';
+import { StyleSheet, Text, View, FlatList, Dimensions, ActivityIndicator, TouchableOpacity, ScrollView, TouchableNativeFeedback, TouchableWithoutFeedbackBase, Clipboard } from 'react-native';
 import Menu, { MenuItem, MenuDivider } from 'react-native-material-menu';
 import * as HN_Util from './HackerNewsAPIUtil';
 import * as WebBrowser from 'expo-web-browser';
@@ -13,12 +13,14 @@ type ItemProps = {
     index: number,
     hideItem: Function,
     read: boolean,
-    navigation: any
+    navigation: any,
+    saved: boolean,
 }
 
 type ItemState = {
     itemData: any,
     hasBeenRead: boolean,
+    isSaved: boolean
 }
 
 export interface ItemStuff {
@@ -34,12 +36,14 @@ const {width, height} = Dimensions.get('window');
 export default class Item extends React.PureComponent<ItemProps, ItemState, {name: string}>{
 
     menuRefs: any[] = [];
+    copyMenuRefs: any[] = [];
     constructor(props: ItemProps){
         super(props)
 
         this.state = {
             itemData: null,
-            hasBeenRead: false
+            hasBeenRead: false,
+            isSaved: false
         }
         
     }
@@ -49,7 +53,7 @@ export default class Item extends React.PureComponent<ItemProps, ItemState, {nam
         //await this.setState({itemData: data});
         //console.log("item is mounting! " + this.props.index);
 
-        this.setState({itemData: this.props.itemData, hasBeenRead: this.props.read});
+        this.setState({itemData: this.props.itemData, hasBeenRead: this.props.read, isSaved: this.props.saved});
     }
 
     async componentDidUpdate(prevProps: ItemProps, prevState: ItemState){
@@ -119,11 +123,15 @@ export default class Item extends React.PureComponent<ItemProps, ItemState, {nam
                                 <Text style={{textAlignVertical: "center", marginRight: 10}}>{itemData.by}</Text>
                                 <Text style={{fontSize: 16, textAlignVertical: "center", marginRight: 10}}>-</Text>
                                 <Text style={{textAlignVertical: "center", marginRight: 10}}>{this.calcTime(itemData.time)}</Text>
-                                <Text style={{fontSize: 16, textAlignVertical: "center", marginRight: 10}}>-</Text>
-                                <Text style={{textAlignVertical: "center", marginRight: 10}}>{itemData.descendants} comment{itemData.descendants === 1 ? '' : 's'}</Text>
+                                {itemData.descendants !== undefined &&
+                                    <React.Fragment>
+                                        <Text style={{fontSize: 16, textAlignVertical: "center", marginRight: 10}}>-</Text>
+                                        <Text style={{textAlignVertical: "center", marginRight: 10}}>{itemData.descendants} comment{itemData.descendants === 1 ? '' : 's'}</Text>
+                                    </React.Fragment>
+                                }
                             </View>
                             
-                            { this.state.hasBeenRead &&
+                            {this.state.hasBeenRead &&
                                 <React.Fragment>
                                     <View style={{flex:1}}/>
                                     <Feather name="book-open" size={24} color="black" />
@@ -169,10 +177,21 @@ export default class Item extends React.PureComponent<ItemProps, ItemState, {nam
                     </View>
                 </TouchableOpacity>
 
-                <View style={{alignItems: "center"}}>
-                    <Feather name="pocket" size={24} color="black" />
-                    <Text>Save</Text>
-                </View>
+                <TouchableOpacity onPress={() => {
+                    if(this.state.isSaved){
+                        StorageService.removeSaveItem(this.state.itemData.id);
+                        this.setState({isSaved: false});
+                    }
+                    else{
+                        StorageService.addSavedItem(this.state.itemData.id);
+                        this.setState({isSaved: true});
+                    }
+                }}>
+                    <View style={{alignItems: "center"}}>
+                        <Feather name="bookmark" size={24} color={this.state.isSaved ? 'green' : 'black'} />
+                        <Text>Save</Text>
+                    </View>
+                </TouchableOpacity>
 
                 <Menu
                     ref={(ref: any) =>this.menuRefs[index] = ref}
@@ -191,8 +210,60 @@ export default class Item extends React.PureComponent<ItemProps, ItemState, {nam
                     }}>
                         <Feather name="user" size={20} color="black" /> <Text style={{textAlignVertical: "center"}}>{itemData.by}</Text>
                     </MenuItem>
-                    <MenuItem onPress={() => this.hideMenu(index)}>Menu item 2</MenuItem>
+
+                    <MenuItem onPress={() => {
+                        if(this.state.hasBeenRead){
+                            StorageService.removeReadItem(this.state.itemData.id);
+                            this.setState({hasBeenRead: false});
+                        }else{
+                            StorageService.addReadItem(this.state.itemData.id);
+                            this.setState({hasBeenRead: true});
+                        }
+                        this.hideMenu(index);
+                    }}>
+                        <Feather name={this.state.hasBeenRead ? 'eye-off' : 'eye'} size={20} color="black" /> <Text style={{textAlignVertical: "center"}}>{this.state.hasBeenRead ? 'Mark Unread' : 'Mark Read'}</Text>
+                    </MenuItem>
+
+                    <MenuItem onPress={() => {
+                        this.hideMenu(index);
+                        this.showCopyMenu(index);
+                    }}>
+                        <Feather name="user" size={20} color="black" /> <Text style={{textAlignVertical: "center"}}>Copy</Text>
+                    </MenuItem>
                 </Menu>
+
+                <Menu ref={(ref: any) =>this.copyMenuRefs[index] = ref}>
+                    <MenuItem disabled={true} disabledTextColor={"black"}>Copy</MenuItem>
+                    <MenuItem onPress={() => {
+                        this.hideCopyMenu(index);
+                        let link = "";
+                        if(!!this.state.itemData.url){
+                            link = this.state.itemData.url
+                        }
+                        else{
+                            link = "https://news.ycombinator.com/item?id=" + this.state.itemData.id;
+                        }
+                        Clipboard.setString(link);
+                    }}>
+                        <Feather name="link" size={20} color="black" /> <Text style={{textAlignVertical: "center"}}>Link</Text>
+                    </MenuItem>
+
+                    <MenuItem onPress={() => {
+                        this.hideCopyMenu(index);
+                        let link = "https://news.ycombinator.com/item?id=" + this.state.itemData.id;
+                        Clipboard.setString(link);
+                    }}>
+                        <Feather name="message-square" size={20} color="black" /> <Text style={{textAlignVertical: "center"}}>Comments</Text>
+                    </MenuItem>
+
+                    <MenuItem onPress={() => {
+                        this.hideCopyMenu(index);
+                        Clipboard.setString(this.state.itemData.title);
+                    }}>
+                        <Feather name="type" size={20} color="black" /> <Text style={{textAlignVertical: "center"}}>Title</Text>
+                    </MenuItem>
+                </Menu>
+
 
 
                 
@@ -205,8 +276,15 @@ export default class Item extends React.PureComponent<ItemProps, ItemState, {nam
     }
 
     hideMenu = (index: number) => {
-        console.log(this.state.itemData.by);
         this.menuRefs[index].hide();
+    }
+
+    showCopyMenu = (index: number) => {
+        this.copyMenuRefs[index].show();
+    }
+
+    hideCopyMenu = (index: number) => {
+        this.copyMenuRefs[index].hide();
     }
 
 

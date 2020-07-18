@@ -82,7 +82,7 @@ function NewsScreen({route, navigation}: {route:any, navigation:any}){
           renderNavigationView={()=>navigationView(setNewsMode, drawerRef, navigation)}
           drawerWidth={250}
         >
-          <News ref={newsRef} newsType={newsMode} navigation={navigation}/>
+          <News ref={newsRef} newsType={newsMode} navigation={navigation} drawerRef={drawerRef}/>
         </DrawerLayoutAndroid>
       </View>
     );
@@ -143,8 +143,15 @@ function navigationView(setNewsMode: Function, drawer: any, navigation: any){
         </View>
       </TouchableNativeFeedback>
 
+      <TouchableNativeFeedback onPress={() => {drawer.current.closeDrawer(); changeNewsData("saved", setNewsMode );}}>
+        <View style={{flexDirection: "row", height: 60}}>
+          <Text style={{fontSize: 20, fontWeight: "bold", textAlignVertical: "center"}}>Saved Stories</Text>
+          
+        </View>
+      </TouchableNativeFeedback>
 
-      <TouchableNativeFeedback onPress={() => {navigation.navigate('Profile',{userId:'jl'})}}>
+
+      <TouchableNativeFeedback onPress={() => {navigation.navigate('Profile',{userId:'tonz'})}}>
         <View style={{flexDirection: "row", height: 60}}>
           <Text style={{fontSize: 20, fontWeight: "bold", textAlignVertical: "center"}}>Testing</Text>
           
@@ -161,6 +168,13 @@ function navigationView(setNewsMode: Function, drawer: any, navigation: any){
       <TouchableNativeFeedback onPress={() => {newsRef.current?.refTest(); StorageService.clearHiddenItems()}}>
         <View style={{flexDirection: "row", height: 60}}>
           <Text style={{fontSize: 20, fontWeight: "bold", textAlignVertical: "center"}}>Clear Hidden Items</Text>
+          
+        </View>
+      </TouchableNativeFeedback>
+
+      <TouchableNativeFeedback onPress={() => {newsRef.current?.refTest(); StorageService.clearSavedItems()}}>
+        <View style={{flexDirection: "row", height: 60}}>
+          <Text style={{fontSize: 20, fontWeight: "bold", textAlignVertical: "center"}}>Clear Saved Items</Text>
           
         </View>
       </TouchableNativeFeedback>
