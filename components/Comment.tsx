@@ -158,12 +158,23 @@ export default class Comment extends React.PureComponent<CommentProps, CommentSt
     renderCommentControls = (data: any) => {
         return(
             <View style={styles.controlsCard}>
+
+                <View style={{alignItems: "center"}}>
+                    <Feather name="triangle" size={24} color="black" />
+                    <Text>Vote Up</Text>
+                </View>
+
                 <TouchableOpacity onPress={() => {this.props.navigation.push('Profile', {userId: this.props.commentData.by})}}>
                     <View style={{alignItems: "center"}}>
                         <Feather name="user" size={24} color="black" />
                         <Text>User</Text>
                     </View>
                 </TouchableOpacity>
+
+                <View style={{alignItems: "center"}}>
+                    <Feather name="send" size={24} color="black" />
+                    <Text>Reply</Text>
+                </View>
             </View>
         );
     }
@@ -227,7 +238,7 @@ const styles = StyleSheet.create({
     controlsCard:{
         width: width,
         minHeight: 100,
-        backgroundColor: "white",
+        backgroundColor: "#D3D3D3",
         flexDirection: "row",
         alignItems: 'center',
         justifyContent: 'space-around',

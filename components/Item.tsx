@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, FlatList, Dimensions, ActivityIndicator, TouchableOpacity, ScrollView, TouchableNativeFeedback, TouchableWithoutFeedbackBase, Clipboard } from 'react-native';
+import { StyleSheet, Text, View, FlatList, Dimensions, ActivityIndicator, TouchableOpacity, ScrollView, TouchableNativeFeedback, TouchableWithoutFeedbackBase, Clipboard, Share } from 'react-native';
 import Menu, { MenuItem, MenuDivider } from 'react-native-material-menu';
 import * as HN_Util from './HackerNewsAPIUtil';
 import * as WebBrowser from 'expo-web-browser';
@@ -165,10 +165,42 @@ export default class Item extends React.PureComponent<ItemProps, ItemState, {nam
                     </View>
                 </TouchableOpacity>
 
-                <View style={{alignItems: "center"}}>
-                    <Feather name="share-2" size={24} color="black" />
-                    <Text>Share</Text>
-                </View>
+                <TouchableOpacity onPress={async () => {
+                    let shareLink = '';
+                    if(!!this.state.itemData.url){
+                        shareLink = this.state.itemData.url
+                    }
+                    else{
+                        shareLink = "https://news.ycombinator.com/item?id=" + this.state.itemData.id;
+                    }
+
+                    try {
+                        const result = await Share.share({
+                            message: shareLink,
+                        });
+                        if (result.action === Share.sharedAction) {
+                            if (result.activityType) {
+                                // shared with activity type of result.activityType
+                                console.log(result.activityType);
+                            } 
+                            else {
+                                // shared
+                                console.log("shared");
+                            }
+                        } else if (result.action === Share.dismissedAction) {
+                            // dismissed
+                            console.log("dismissed");
+                        }
+                    }catch(error){
+                        console.log(error.message);
+                    }
+                        
+                }}>
+                    <View style={{alignItems: "center"}}>
+                        <Feather name="share-2" size={24} color="black" />
+                        <Text>Share</Text>
+                    </View>
+                </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => {this.props.hideItem(this.props.index)}}>
                     <View style={{alignItems: "center"}}>
@@ -208,7 +240,7 @@ export default class Item extends React.PureComponent<ItemProps, ItemState, {nam
                         this.hideMenu(index);
                         this.props.navigation.push('Profile', {userId: this.state.itemData.by});
                     }}>
-                        <Feather name="user" size={20} color="black" /> <Text style={{textAlignVertical: "center"}}>{itemData.by}</Text>
+                        <Feather name="user" size={20} color="black" /><Text style={{textAlignVertical: "center"}}>{itemData.by}</Text>
                     </MenuItem>
 
                     <MenuItem onPress={() => {
@@ -221,14 +253,14 @@ export default class Item extends React.PureComponent<ItemProps, ItemState, {nam
                         }
                         this.hideMenu(index);
                     }}>
-                        <Feather name={this.state.hasBeenRead ? 'eye-off' : 'eye'} size={20} color="black" /> <Text style={{textAlignVertical: "center"}}>{this.state.hasBeenRead ? 'Mark Unread' : 'Mark Read'}</Text>
+                        <Feather name={this.state.hasBeenRead ? 'eye-off' : 'eye'} size={20} color="black" /><Text style={{textAlignVertical: "center"}}>{this.state.hasBeenRead ? 'Mark Unread' : 'Mark Read'}</Text>
                     </MenuItem>
 
                     <MenuItem onPress={() => {
                         this.hideMenu(index);
                         this.showCopyMenu(index);
                     }}>
-                        <Feather name="user" size={20} color="black" /> <Text style={{textAlignVertical: "center"}}>Copy</Text>
+                        <Feather name="user" size={20} color="black" /><Text style={{textAlignVertical: "center"}}>Copy</Text>
                     </MenuItem>
                 </Menu>
 
@@ -245,7 +277,7 @@ export default class Item extends React.PureComponent<ItemProps, ItemState, {nam
                         }
                         Clipboard.setString(link);
                     }}>
-                        <Feather name="link" size={20} color="black" /> <Text style={{textAlignVertical: "center"}}>Link</Text>
+                        <Feather name="link" size={20} color="black" /><Text style={{textAlignVertical: "center"}}>Link</Text>
                     </MenuItem>
 
                     <MenuItem onPress={() => {
@@ -253,14 +285,14 @@ export default class Item extends React.PureComponent<ItemProps, ItemState, {nam
                         let link = "https://news.ycombinator.com/item?id=" + this.state.itemData.id;
                         Clipboard.setString(link);
                     }}>
-                        <Feather name="message-square" size={20} color="black" /> <Text style={{textAlignVertical: "center"}}>Comments</Text>
+                        <Feather name="message-square" size={20} color="black" /><Text style={{textAlignVertical: "center"}}>Comments</Text>
                     </MenuItem>
 
                     <MenuItem onPress={() => {
                         this.hideCopyMenu(index);
                         Clipboard.setString(this.state.itemData.title);
                     }}>
-                        <Feather name="type" size={20} color="black" /> <Text style={{textAlignVertical: "center"}}>Title</Text>
+                        <Feather name="type" size={20} color="black" /><Text style={{textAlignVertical: "center"}}>Title</Text>
                     </MenuItem>
                 </Menu>
 
