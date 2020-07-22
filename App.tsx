@@ -1,12 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
 import * as Font from 'expo-font';
-import { Feather } from '@expo/vector-icons';
+import { Feather, Foundation, MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useState, useEffect, Ref }  from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, DrawerLayoutAndroid, TouchableNativeFeedback, BackHandler, Alert } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, DrawerLayoutAndroid, TouchableNativeFeedback, BackHandler, Alert, ScrollView } from 'react-native';
 import * as StorageService from "./services/StorageService";
 
 import Profile from './components/Profile';
 import Thread from './components/Thread';
+import Settings from './components/Settings';
 
 import { NavigationContainer, useFocusEffect } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -62,6 +63,7 @@ function NewsScreen({route, navigation}: {route:any, navigation:any}){
   );
 
   const [newsMode, setNewsMode] = useState("top");
+  const [showOtherOptions, setShowOtherOptions] = useState(false);
   const [resourcesLoaded, setResourcesLoaded] = useState(false);
 
   if(!resourcesLoaded){
@@ -79,7 +81,7 @@ function NewsScreen({route, navigation}: {route:any, navigation:any}){
         <View style={{marginTop: 24}}/>
         <DrawerLayoutAndroid
           ref={drawerRef}
-          renderNavigationView={()=>navigationView(setNewsMode, drawerRef, navigation)}
+          renderNavigationView={()=>navigationView(setNewsMode, setShowOtherOptions, showOtherOptions, drawerRef, navigation)}
           drawerWidth={250}
         >
           <News ref={newsRef} newsType={newsMode} navigation={navigation} drawerRef={drawerRef}/>
@@ -101,6 +103,12 @@ function ThreadScreen({route, navigation}: {route:any, navigation:any}) {
   );
 }
 
+function SettingsScreen({route, navigation}: {route:any, navigation:any}) {
+  return (
+    <Settings navigation={navigation} />
+  );
+}
+
 
 export default function App() {
 
@@ -112,72 +120,104 @@ export default function App() {
         <Stack.Screen options={{headerShown:false}} name="News" component={NewsScreen} />
         <Stack.Screen options={{headerShown:false}} name="Profile" component={ProfileScreen} />
         <Stack.Screen options={{headerShown:false}} name="Thread" component={ThreadScreen} />
+        <Stack.Screen options={{headerShown:false}} name="Settings" component={SettingsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
 
 }
 
-function navigationView(setNewsMode: Function, drawer: any, navigation: any){
+function navigationView(setNewsMode: Function, setShowOtherOptions: Function, showOtherOptions: boolean, drawer: any, navigation: any){
   return(
-    <View style={{flex:1, padding: 20}}>
-
-      <TouchableNativeFeedback onPress={() => {drawer.current.closeDrawer(); changeNewsData("top", setNewsMode );}}>
-        <View style={{flexDirection: "row", height: 60}}>
-          <Text style={{fontSize: 20, fontWeight: "bold", textAlignVertical: "center"}}>Top Stories</Text>
-
+    <View style={{flex:1,}}>
+      <ScrollView style={{backgroundColor: "#FFE0B2"}} showsHorizontalScrollIndicator={false}>
+        <View style={[styles.sideMenuMainItem, {backgroundColor: "#90CAF9"}]}>
         </View>
-      </TouchableNativeFeedback>
+        <TouchableNativeFeedback onPress={() => {
+            console.log("TODO: Implement Login function :)");
+          }}>
+          <View style={[styles.sideMenuMainItem, {backgroundColor: "#90CAF9"}]}>
+            <Text style={styles.menuItemText}>Login</Text>
+            <Feather style={styles.menuIcon} name="log-in" size={24} color="black" />
+          </View>
+        </TouchableNativeFeedback>
 
-      <TouchableNativeFeedback onPress={() => {drawer.current.closeDrawer(); changeNewsData("best", setNewsMode );}}>
-        <View style={{flexDirection: "row", height: 60}}>
-          <Text style={{fontSize: 20, fontWeight: "bold", textAlignVertical: "center"}}>Best Stories</Text>
-          
-        </View>
-      </TouchableNativeFeedback>
+        <TouchableNativeFeedback onPress={() => {drawer.current.closeDrawer(); changeNewsData("top", setNewsMode );}}>
+          <View style={styles.sideMenuMainItem}>
+            <Text style={styles.menuItemText}>Top Stories</Text>
+            <Feather style={styles.menuIcon} name="bar-chart" size={24} color="black" />
+          </View>
+        </TouchableNativeFeedback>
 
-      <TouchableNativeFeedback onPress={() => {drawer.current.closeDrawer(); changeNewsData("new", setNewsMode );}}>
-        <View style={{flexDirection: "row", height: 60}}>
-          <Text style={{fontSize: 20, fontWeight: "bold", textAlignVertical: "center"}}>New Stories</Text>
-          
-        </View>
-      </TouchableNativeFeedback>
+        <TouchableNativeFeedback onPress={() => {drawer.current.closeDrawer(); changeNewsData("best", setNewsMode );}}>
+          <View style={styles.sideMenuMainItem}>
+            <Text style={styles.menuItemText}>Best Stories</Text>
+            <Feather style={styles.menuIcon} name="award" size={24} color="black" />
+          </View>
+        </TouchableNativeFeedback>
 
-      <TouchableNativeFeedback onPress={() => {drawer.current.closeDrawer(); changeNewsData("saved", setNewsMode );}}>
-        <View style={{flexDirection: "row", height: 60}}>
-          <Text style={{fontSize: 20, fontWeight: "bold", textAlignVertical: "center"}}>Saved Stories</Text>
-          
-        </View>
-      </TouchableNativeFeedback>
+        <TouchableNativeFeedback onPress={() => {drawer.current.closeDrawer(); changeNewsData("new", setNewsMode );}}>
+          <View style={styles.sideMenuMainItem}>
+            <Text style={styles.menuItemText}>New Stories</Text>
+            <Foundation style={styles.menuIcon} name="burst-new" size={24} color="black" />
+          </View>
+        </TouchableNativeFeedback>
 
+        <View style={{marginLeft: 10, marginRight: 10, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: "black"}}/>
 
-      <TouchableNativeFeedback onPress={() => {navigation.navigate('Profile',{userId:'tonz'})}}>
-        <View style={{flexDirection: "row", height: 60}}>
-          <Text style={{fontSize: 20, fontWeight: "bold", textAlignVertical: "center"}}>Testing</Text>
-          
-        </View>
-      </TouchableNativeFeedback>
+        <TouchableNativeFeedback onPress={() => {setShowOtherOptions(!showOtherOptions);}}>
+          <View style={styles.sideMenuMainItem}>
+            <Text style={styles.menuItemText}>Other</Text>
+            <Feather style={styles.menuIcon} name={showOtherOptions ? "chevron-up" : "chevron-down"} size={24} color="black" />
+          </View>
+        </TouchableNativeFeedback>
 
-      <TouchableNativeFeedback onPress={() => {StorageService.clearReadItems()}}>
-        <View style={{flexDirection: "row", height: 60}}>
-          <Text style={{fontSize: 20, fontWeight: "bold", textAlignVertical: "center"}}>Clear Read Items</Text>
-          
-        </View>
-      </TouchableNativeFeedback>
+        {!showOtherOptions && <View style={{marginLeft: 10, marginRight: 10, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: "black"}}/>}
 
-      <TouchableNativeFeedback onPress={() => {newsRef.current?.refTest(); StorageService.clearHiddenItems()}}>
-        <View style={{flexDirection: "row", height: 60}}>
-          <Text style={{fontSize: 20, fontWeight: "bold", textAlignVertical: "center"}}>Clear Hidden Items</Text>
-          
-        </View>
-      </TouchableNativeFeedback>
+        {showOtherOptions &&
+          <View>
+            <TouchableNativeFeedback onPress={() => {drawer.current.closeDrawer(); changeNewsData("ask", setNewsMode ); setShowOtherOptions(!showOtherOptions);}}>
+              <View style={styles.sideMenuMainItem}>
+                <Text style={styles.menuSubItemText}>Ask</Text>
+                <Feather style={styles.menuIcon} name="help-circle" size={24} color="black" />
+              </View>
+            </TouchableNativeFeedback>
 
-      <TouchableNativeFeedback onPress={() => {newsRef.current?.refTest(); StorageService.clearSavedItems()}}>
-        <View style={{flexDirection: "row", height: 60}}>
-          <Text style={{fontSize: 20, fontWeight: "bold", textAlignVertical: "center"}}>Clear Saved Items</Text>
-          
-        </View>
-      </TouchableNativeFeedback>
+            <TouchableNativeFeedback onPress={() => {drawer.current.closeDrawer(); changeNewsData("show", setNewsMode ); setShowOtherOptions(!showOtherOptions);}}>
+              <View style={styles.sideMenuMainItem}>
+                <Text style={styles.menuSubItemText}>Show</Text>
+                <MaterialCommunityIcons style={styles.menuIcon} name="presentation" size={24} color="black" />
+              </View>
+            </TouchableNativeFeedback>
+
+            <TouchableNativeFeedback onPress={() => {drawer.current.closeDrawer(); changeNewsData("jobs", setNewsMode ); setShowOtherOptions(!showOtherOptions);}}>
+              <View style={styles.sideMenuMainItem}>
+                <Text style={styles.menuSubItemText}>Jobs</Text>
+                <Feather style={styles.menuIcon} name="briefcase" size={24} color="black" />
+              </View>
+            </TouchableNativeFeedback>
+
+            <View style={{marginLeft: 10, marginRight: 10, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: "black"}}/>
+
+          </View>
+        }
+
+        <TouchableNativeFeedback onPress={() => {drawer.current.closeDrawer(); changeNewsData("saved", setNewsMode );}}>
+          <View style={styles.sideMenuMainItem}>
+            <Text style={styles.menuItemText}>Saved Stories</Text>
+            <Feather style={styles.menuIcon} name="bookmark" size={24} color="black" />
+          </View>
+        </TouchableNativeFeedback>
+
+        <TouchableNativeFeedback onPress={() => {
+            navigation.navigate('Settings');
+          }}>
+          <View style={styles.sideMenuMainItem}>
+            <Text style={styles.menuItemText}>Settings</Text>
+            <Feather style={styles.menuIcon} name="settings" size={24} color="black" />
+          </View>
+        </TouchableNativeFeedback>
+      </ScrollView>
     </View>
   );
 }
@@ -190,6 +230,8 @@ async function loadResources(setResourcesLoaded: Function) {
   await Promise.all([
     Font.loadAsync({
       ...Feather.font,
+      ...Foundation.font,
+      ...MaterialCommunityIcons.font
     }),
   ]);
 
@@ -204,4 +246,30 @@ const styles = StyleSheet.create({
     //alignItems: 'center',
     //justifyContent: 'center',
   },
+  sideMenuMainItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    height: 60
+  },
+  menuItemText:{
+    paddingLeft: 10, 
+    fontSize: 20, 
+    textAlignVertical: "center",
+    //color: "#929292"
+    //color: "#424242"
+    color: "#546E7A"
+  },
+  menuSubItemText:{
+    paddingLeft: 25, 
+    fontSize: 20, 
+    textAlignVertical: "center",
+    //color: "#929292"
+    //color: "#424242"
+    color: "#546E7A"
+  },
+  menuIcon:{
+    paddingRight: 25,
+    textAlignVertical: "center",
+    color: "#546E7A"
+  }
 });

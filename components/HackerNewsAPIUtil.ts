@@ -47,6 +47,51 @@ export async function getNewStories(){
     }
 };
 
+export async function getAskStories(){
+    let endPointURl = URLS.HN_API + "/askstories.json"
+
+    try{
+        let askStories = await axios({
+            method: 'get',
+            url: endPointURl
+        });
+        return askStories.data;
+    }
+    catch(e){
+        console.log(e);
+    }
+};
+
+export async function getShowStories(){
+    let endPointURl = URLS.HN_API + "/showstories.json"
+
+    try{
+        let showStories = await axios({
+            method: 'get',
+            url: endPointURl
+        });
+        return showStories.data;
+    }
+    catch(e){
+        console.log(e);
+    }
+};
+
+export async function getJobStories(){
+    let endPointURl = URLS.HN_API + "/jobstories.json"
+
+    try{
+        let jobStories = await axios({
+            method: 'get',
+            url: endPointURl
+        });
+        return jobStories.data;
+    }
+    catch(e){
+        console.log(e);
+    }
+};
+
 export async function getItem(id: number){
     let endPointURl = URLS.HN_API + "/item/" + id.toString() + ".json";
 

@@ -57,8 +57,8 @@ export default class Item extends React.PureComponent<ItemProps, ItemState, {nam
     }
 
     async componentDidUpdate(prevProps: ItemProps, prevState: ItemState){
-        if(prevProps.itemData.descendants !== this.props.itemData.descendants || prevProps.itemData.score !== this.props.itemData.score ){
-            this.setState({itemData: this.props.itemData});
+        if(prevProps.itemData.descendants !== this.props.itemData.descendants || prevProps.itemData.score !== this.props.itemData.score || prevProps.read !== this.props.read || prevProps.saved !== this.props.saved){
+            this.setState({itemData: this.props.itemData, hasBeenRead: this.props.read, isSaved: this.props.saved});
         }
         //let data = await HN_Util.getItem(this.props.itemID);
 

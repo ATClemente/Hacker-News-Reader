@@ -43,24 +43,24 @@ export default class News extends React.Component<NewsProps, NewsState>{
     }
 
     async componentDidMount(){
-        let readItems = await StorageService.getReadItems();
-        let savedItems = await StorageService.getSavedItems();
-        await this.setState({readItems: readItems, savedItems: savedItems});
+        //let readItems = await StorageService.getReadItems();
+        //let savedItems = await StorageService.getSavedItems();
+        //await this.setState({readItems: readItems, savedItems: savedItems});
         this.loadInitialData();
     }
 
     async componentDidUpdate(prevProps: NewsProps){
         if(this.props.newsType !== prevProps.newsType){
-            let readItems = await StorageService.getReadItems();
-            let savedItems = await StorageService.getSavedItems();
-            await this.setState({readItems: readItems, savedItems: savedItems, newsData: []});
+            //let readItems = await StorageService.getReadItems();
+            //let savedItems = await StorageService.getSavedItems();
+            //await this.setState({readItems: readItems, savedItems: savedItems, newsData: []});
             this.loadInitialData();
         }
     }
 
 
     render(){
-        if(this.state.newsData.length < 1){
+        if(this.state.dataLoading){
             return(
                 <View style={{flex: 1,
                     backgroundColor: '#fff',
@@ -81,6 +81,7 @@ export default class News extends React.Component<NewsProps, NewsState>{
                         ItemSeparatorComponent={this._renderListSeparator}
                         ListHeaderComponent={this._renderListHeader}
                         ListFooterComponent={this._renderListFooter}
+                        ListEmptyComponent={this._renderEmptyList}
                         //initialNumToRender={8}
                         //maxToRenderPerBatch={1}
                         windowSize={10}
@@ -137,6 +138,12 @@ export default class News extends React.Component<NewsProps, NewsState>{
         );
     }
 
+    _renderEmptyList = () => {
+        return(
+            <Text>Nothing here!</Text>
+        );
+    }
+
     getHeaderText = () => {
         if(this.props.newsType === "top"){
             return "Top Stories";
@@ -148,6 +155,18 @@ export default class News extends React.Component<NewsProps, NewsState>{
 
         if(this.props.newsType === "new"){
             return "New Stories";
+        }
+
+        if(this.props.newsType === "show"){
+            return "Show HN";
+        }
+
+        if(this.props.newsType === "ask"){
+            return "Ask HN";
+        }
+
+        if(this.props.newsType === "jobs"){
+            return "Jobs";
         }
 
         if(this.props.newsType === "saved"){
@@ -171,20 +190,33 @@ export default class News extends React.Component<NewsProps, NewsState>{
     loadInitialData = async () => {
         await this.setState({dataLoading: true, startSlice: 0});
         let data = [];
-        if(this.props.newsType === "top"){
-            data = await HN_Util.getTopStories();
-        }
-        else if(this.props.newsType === "best"){
-            data = await HN_Util.getBestStories();
-        }
-        else if(this.props.newsType === "new"){
-            data = await HN_Util.getNewStories();
-        }
-        else if(this.props.newsType === "saved"){
-            data = await StorageService.getSavedItems();
+        switch(this.props.newsType){
+            case "top":
+                data = await HN_Util.getTopStories();
+            break;
+            case "best":
+                data = await HN_Util.getBestStories();
+            break;
+            case "new":
+                data = await HN_Util.getNewStories();
+            break;
+            case "show":
+                data = await HN_Util.getShowStories();
+            break;
+            case "ask":
+                data = await HN_Util.getAskStories();
+            break;
+            case "jobs":
+                data = await HN_Util.getJobStories();
+            break;
+            case "saved":
+                data = await StorageService.getSavedItems();
+            break;
         }
 
         let hiddenItems = await StorageService.getHiddenItems();
+        let readItems = await StorageService.getReadItems();
+        let savedItems = await StorageService.getSavedItems();
 
         let itemData = [];
         let subIds = data.slice(this.state.startSlice, this.state.startSlice + 20)
@@ -199,7 +231,7 @@ export default class News extends React.Component<NewsProps, NewsState>{
 
 
 
-        this.setState({newsData: itemData, itemIDs: data, startSlice: this.state.startSlice + 20, dataLoading: false});
+        this.setState({newsData: itemData, readItems: readItems, savedItems: savedItems, itemIDs: data, startSlice: this.state.startSlice + 20, dataLoading: false});
     }
 
     loadNextBatch = async () => {
