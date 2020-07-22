@@ -240,7 +240,7 @@ export default class Item extends React.PureComponent<ItemProps, ItemState, {nam
                         this.hideMenu(index);
                         this.props.navigation.push('Profile', {userId: this.state.itemData.by});
                     }}>
-                        <Feather name="user" size={20} color="black" /><Text style={{textAlignVertical: "center"}}>{itemData.by}</Text>
+                        <Feather name="user" size={20} color="black" /><Text style={{textAlignVertical: "center"}}>  {itemData.by}</Text>
                     </MenuItem>
 
                     <MenuItem onPress={() => {
@@ -253,14 +253,14 @@ export default class Item extends React.PureComponent<ItemProps, ItemState, {nam
                         }
                         this.hideMenu(index);
                     }}>
-                        <Feather name={this.state.hasBeenRead ? 'eye-off' : 'eye'} size={20} color="black" /><Text style={{textAlignVertical: "center"}}>{this.state.hasBeenRead ? 'Mark Unread' : 'Mark Read'}</Text>
+                        <Feather name={this.state.hasBeenRead ? 'eye-off' : 'eye'} size={20} color="black" /><Text style={{textAlignVertical: "center"}}>  {this.state.hasBeenRead ? 'Mark Unread' : 'Mark Read'}</Text>
                     </MenuItem>
 
                     <MenuItem onPress={() => {
                         this.hideMenu(index);
                         this.showCopyMenu(index);
                     }}>
-                        <Feather name="user" size={20} color="black" /><Text style={{textAlignVertical: "center"}}>Copy</Text>
+                        <Feather name="copy" size={20} color="black" /><Text style={{textAlignVertical: "center"}}>  Copy</Text>
                     </MenuItem>
                 </Menu>
 
@@ -277,7 +277,7 @@ export default class Item extends React.PureComponent<ItemProps, ItemState, {nam
                         }
                         Clipboard.setString(link);
                     }}>
-                        <Feather name="link" size={20} color="black" /><Text style={{textAlignVertical: "center"}}>Link</Text>
+                        <Feather name="link" size={20} color="black" /><Text style={{textAlignVertical: "center"}}>  Link</Text>
                     </MenuItem>
 
                     <MenuItem onPress={() => {
@@ -285,14 +285,14 @@ export default class Item extends React.PureComponent<ItemProps, ItemState, {nam
                         let link = "https://news.ycombinator.com/item?id=" + this.state.itemData.id;
                         Clipboard.setString(link);
                     }}>
-                        <Feather name="message-square" size={20} color="black" /><Text style={{textAlignVertical: "center"}}>Comments</Text>
+                        <Feather name="message-square" size={20} color="black" /><Text style={{textAlignVertical: "center"}}>  Comments</Text>
                     </MenuItem>
 
                     <MenuItem onPress={() => {
                         this.hideCopyMenu(index);
                         Clipboard.setString(this.state.itemData.title);
                     }}>
-                        <Feather name="type" size={20} color="black" /><Text style={{textAlignVertical: "center"}}>Title</Text>
+                        <Feather name="type" size={20} color="black" /><Text style={{textAlignVertical: "center"}}>  Title</Text>
                     </MenuItem>
                 </Menu>
 
@@ -365,6 +365,10 @@ export default class Item extends React.PureComponent<ItemProps, ItemState, {nam
             WebBrowser.openBrowserAsync(itemData.url);
         }
         else if(!!itemData.text){
+            this.props.navigation.push('Thread', {itemData: this.state.itemData});
+        }
+        else{
+            //Same as if else, just not sure who many fall into this category.  I know "ASK HN" does:
             this.props.navigation.push('Thread', {itemData: this.state.itemData});
         }
         StorageService.addReadItem(itemData.id);

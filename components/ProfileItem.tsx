@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, FlatList, Dimensions, ActivityIndicator, Toucha
 import HTML from 'react-native-render-html';
 import * as WebBrowser from 'expo-web-browser';
 import * as HN_Util from './HackerNewsAPIUtil';
+import { Feather } from '@expo/vector-icons';
 
 type ProfileItemProps = {
     itemData: any,
@@ -44,7 +45,7 @@ export default function ProfileItem({itemData, index, navigation}: ProfileItemPr
 
             <View style={styles.controlsCard}>
                 {itemData.type === 'comment' &&
-                    <Text>Comment controls</Text>
+                    renderCommentControls(itemData, navigation)
                 }
                 {itemData.type === 'story' &&
                     <Text>Story controls</Text>
@@ -102,6 +103,38 @@ function renderJobInfo(data: any){
     return null;
 }
 
+function renderCommentControls(data: any, navigation: any){
+    return(
+        <View style={styles.controlsCard}>
+
+        <View style={{alignItems: "center"}}>
+            <Feather name="triangle" size={24} color="black" />
+            <Text>Vote Up</Text>
+        </View>
+
+        <TouchableOpacity onPress={async () => {
+            let itemData = data;
+            while(!!itemData.parent){
+                itemData = await HN_Util.getItem(itemData.parent);
+            }
+            if(!!itemData){
+                navigation.push('Thread', {itemData: itemData});
+            }
+        }}>
+            <View style={{alignItems: "center"}}>
+                <Feather name="message-square" size={24} color="black" />
+                <Text>Thread</Text>
+            </View>
+        </TouchableOpacity>
+
+        <View style={{alignItems: "center"}}>
+            <Feather name="send" size={24} color="black" />
+            <Text>Reply</Text>
+        </View>
+    </View>
+    );
+}
+
 function calcTime(postTime: any): string {
     let currentTime = new Date().getTime();
     
@@ -153,7 +186,7 @@ const styles = StyleSheet.create({
     },
     itemCard:{
         width: width - 14,
-        minHeight: 100,
+        minHeight: 50,
         marginLeft: 7,
         marginRight: 7,
         borderRadius: 5,
@@ -166,7 +199,7 @@ const styles = StyleSheet.create({
         marginLeft: 7,
         marginRight: 7,
         borderRadius: 5,
-        minHeight: 100,
+        minHeight: 50,
         backgroundColor: "white",
         flexDirection: "row",
         alignItems: 'center',

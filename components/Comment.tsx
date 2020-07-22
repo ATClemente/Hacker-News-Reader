@@ -230,14 +230,14 @@ const styles = StyleSheet.create({
     },
     itemCard:{
         width: width,
-        minHeight: 100,
+        minHeight: 50,
         padding:10,
         backgroundColor: "white",
         //flexDirection: "row"
     },
     controlsCard:{
         width: width,
-        minHeight: 100,
+        minHeight: 50,
         backgroundColor: "#D3D3D3",
         flexDirection: "row",
         alignItems: 'center',
