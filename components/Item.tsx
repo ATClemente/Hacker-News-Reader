@@ -152,154 +152,157 @@ export default class Item extends React.PureComponent<ItemProps, ItemState, {nam
 
     renderControls = (itemData: any, index: number) => {
         return(
-            <View style={styles.controlsCard}>
-                <View style={{alignItems: "center"}}>
-                    <Feather name="triangle" size={24} color="black" />
-                    <Text>Vote Up</Text>
-                </View>
-
-                <TouchableOpacity onPress={() => {this.props.navigation.push('Thread', {itemData: this.state.itemData})}}>
-                    <View style={{alignItems: "center"}}>
-                        <Feather name="message-square" size={24} color="black" />
-                        <Text>Comments</Text>
-                    </View>
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={async () => {
-                    let shareLink = '';
-                    if(!!this.state.itemData.url){
-                        shareLink = this.state.itemData.url
-                    }
-                    else{
-                        shareLink = "https://news.ycombinator.com/item?id=" + this.state.itemData.id;
-                    }
-
-                    try {
-                        const result = await Share.share({
-                            message: shareLink,
-                        });
-                        if (result.action === Share.sharedAction) {
-                            if (result.activityType) {
-                                // shared with activity type of result.activityType
-                                console.log(result.activityType);
-                            } 
-                            else {
-                                // shared
-                                console.log("shared");
-                            }
-                        } else if (result.action === Share.dismissedAction) {
-                            // dismissed
-                            console.log("dismissed");
-                        }
-                    }catch(error){
-                        console.log(error.message);
-                    }
-                        
-                }}>
-                    <View style={{alignItems: "center"}}>
-                        <Feather name="share-2" size={24} color="black" />
-                        <Text>Share</Text>
-                    </View>
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => {this.props.hideItem(this.props.index)}}>
-                    <View style={{alignItems: "center"}}>
-                        <Feather name="x" size={24} color="black" />
-                        <Text>Hide</Text>
-                    </View>
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => {
-                    if(this.state.isSaved){
-                        StorageService.removeSaveItem(this.state.itemData.id);
-                        this.setState({isSaved: false});
-                    }
-                    else{
-                        StorageService.addSavedItem(this.state.itemData.id);
-                        this.setState({isSaved: true});
-                    }
-                }}>
-                    <View style={{alignItems: "center"}}>
-                        <Feather name="bookmark" size={24} color={this.state.isSaved ? 'green' : 'black'} />
-                        <Text>Save</Text>
-                    </View>
-                </TouchableOpacity>
-
-                <Menu
-                    ref={(ref: any) =>this.menuRefs[index] = ref}
-                    button={
-                        <TouchableOpacity onPress={() => this.showMenu(index)}>
-                        <View style={{alignItems: "center"}}>
-                            <Feather name="more-vertical" size={24} color="black" />
-                            <Text>More</Text>
+            <React.Fragment>
+                <View style={styles.controlsCard}>
+                    {itemData.type !== "job" &&
+                        <React.Fragment>
+                            <View style={{alignItems: "center"}}>
+                                <Feather name="triangle" size={24} color="black" />
+                                <Text>Vote Up</Text>
                             </View>
-                        </TouchableOpacity>
+
+                            <TouchableOpacity onPress={() => {this.props.navigation.push('Thread', {itemData: this.state.itemData})}}>
+                                <View style={{alignItems: "center"}}>
+                                    <Feather name="message-square" size={24} color="black" />
+                                    <Text>Comments</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </React.Fragment>
                     }
-                >
-                    <MenuItem onPress={() => {
-                        this.hideMenu(index);
-                        this.props.navigation.push('Profile', {userId: this.state.itemData.by});
-                    }}>
-                        <Feather name="user" size={20} color="black" /><Text style={{textAlignVertical: "center"}}>  {itemData.by}</Text>
-                    </MenuItem>
 
-                    <MenuItem onPress={() => {
-                        if(this.state.hasBeenRead){
-                            StorageService.removeReadItem(this.state.itemData.id);
-                            this.setState({hasBeenRead: false});
-                        }else{
-                            StorageService.addReadItem(this.state.itemData.id);
-                            this.setState({hasBeenRead: true});
-                        }
-                        this.hideMenu(index);
-                    }}>
-                        <Feather name={this.state.hasBeenRead ? 'eye-off' : 'eye'} size={20} color="black" /><Text style={{textAlignVertical: "center"}}>  {this.state.hasBeenRead ? 'Mark Unread' : 'Mark Read'}</Text>
-                    </MenuItem>
-
-                    <MenuItem onPress={() => {
-                        this.hideMenu(index);
-                        this.showCopyMenu(index);
-                    }}>
-                        <Feather name="copy" size={20} color="black" /><Text style={{textAlignVertical: "center"}}>  Copy</Text>
-                    </MenuItem>
-                </Menu>
-
-                <Menu ref={(ref: any) =>this.copyMenuRefs[index] = ref}>
-                    <MenuItem disabled={true} disabledTextColor={"black"}>Copy</MenuItem>
-                    <MenuItem onPress={() => {
-                        this.hideCopyMenu(index);
-                        let link = "";
+                    <TouchableOpacity onPress={async () => {
+                        let shareLink = '';
                         if(!!this.state.itemData.url){
-                            link = this.state.itemData.url
+                            shareLink = this.state.itemData.url
                         }
                         else{
-                            link = "https://news.ycombinator.com/item?id=" + this.state.itemData.id;
+                            shareLink = "https://news.ycombinator.com/item?id=" + this.state.itemData.id;
                         }
-                        Clipboard.setString(link);
+
+                        try {
+                            const result = await Share.share({
+                                message: shareLink,
+                            });
+                            if (result.action === Share.sharedAction) {
+                                if (result.activityType) {
+                                    // shared with activity type of result.activityType
+                                    console.log(result.activityType);
+                                } 
+                                else {
+                                    // shared
+                                    console.log("shared");
+                                }
+                            } else if (result.action === Share.dismissedAction) {
+                                // dismissed
+                                console.log("dismissed");
+                            }
+                        }catch(error){
+                            console.log(error.message);
+                        }
+                            
                     }}>
-                        <Feather name="link" size={20} color="black" /><Text style={{textAlignVertical: "center"}}>  Link</Text>
-                    </MenuItem>
+                        <View style={{alignItems: "center"}}>
+                            <Feather name="share-2" size={24} color="black" />
+                            <Text>Share</Text>
+                        </View>
+                    </TouchableOpacity>
 
-                    <MenuItem onPress={() => {
-                        this.hideCopyMenu(index);
-                        let link = "https://news.ycombinator.com/item?id=" + this.state.itemData.id;
-                        Clipboard.setString(link);
+                    <TouchableOpacity onPress={() => {this.props.hideItem(this.props.index)}}>
+                        <View style={{alignItems: "center"}}>
+                            <Feather name="x" size={24} color="black" />
+                            <Text>Hide</Text>
+                        </View>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity onPress={() => {
+                        if(this.state.isSaved){
+                            StorageService.removeSaveItem(this.state.itemData.id);
+                            this.setState({isSaved: false});
+                        }
+                        else{
+                            StorageService.addSavedItem(this.state.itemData.id);
+                            this.setState({isSaved: true});
+                        }
                     }}>
-                        <Feather name="message-square" size={20} color="black" /><Text style={{textAlignVertical: "center"}}>  Comments</Text>
-                    </MenuItem>
+                        <View style={{alignItems: "center"}}>
+                            <Feather name="bookmark" size={24} color={this.state.isSaved ? 'green' : 'black'} />
+                            <Text>Save</Text>
+                        </View>
+                    </TouchableOpacity>
 
-                    <MenuItem onPress={() => {
-                        this.hideCopyMenu(index);
-                        Clipboard.setString(this.state.itemData.title);
-                    }}>
-                        <Feather name="type" size={20} color="black" /><Text style={{textAlignVertical: "center"}}>  Title</Text>
-                    </MenuItem>
-                </Menu>
+                    <Menu
+                        ref={(ref: any) =>this.menuRefs[index] = ref}
+                        button={
+                            <TouchableOpacity onPress={() => this.showMenu(index)}>
+                            <View style={{alignItems: "center"}}>
+                                <Feather name="more-vertical" size={24} color="black" />
+                                <Text>More</Text>
+                                </View>
+                            </TouchableOpacity>
+                        }
+                    >
+                        <MenuItem onPress={() => {
+                            this.hideMenu(index);
+                            this.props.navigation.push('Profile', {userId: this.state.itemData.by});
+                        }}>
+                            <Feather name="user" size={20} color="black" /><Text style={{textAlignVertical: "center"}}>  {itemData.by}</Text>
+                        </MenuItem>
 
+                        <MenuItem onPress={() => {
+                            if(this.state.hasBeenRead){
+                                StorageService.removeReadItem(this.state.itemData.id);
+                                this.setState({hasBeenRead: false});
+                            }else{
+                                StorageService.addReadItem(this.state.itemData.id);
+                                this.setState({hasBeenRead: true});
+                            }
+                            this.hideMenu(index);
+                        }}>
+                            <Feather name={this.state.hasBeenRead ? 'eye-off' : 'eye'} size={20} color="black" /><Text style={{textAlignVertical: "center"}}>  {this.state.hasBeenRead ? 'Mark Unread' : 'Mark Read'}</Text>
+                        </MenuItem>
 
+                        <MenuItem onPress={() => {
+                            this.hideMenu(index);
+                            this.showCopyMenu(index);
+                        }}>
+                            <Feather name="copy" size={20} color="black" /><Text style={{textAlignVertical: "center"}}>  Copy</Text>
+                        </MenuItem>
+                    </Menu>
 
-                
-            </View>
+                </View>
+                <Menu ref={(ref: any) =>this.copyMenuRefs[index] = ref}>
+                        <MenuItem disabled={true} disabledTextColor={"black"}>Copy</MenuItem>
+                        <MenuItem onPress={() => {
+                            this.hideCopyMenu(index);
+                            let link = "";
+                            if(!!this.state.itemData.url){
+                                link = this.state.itemData.url
+                            }
+                            else{
+                                link = "https://news.ycombinator.com/item?id=" + this.state.itemData.id;
+                            }
+                            Clipboard.setString(link);
+                        }}>
+                            <Feather name="link" size={20} color="black" /><Text style={{textAlignVertical: "center"}}>  Link</Text>
+                        </MenuItem>
+
+                        <MenuItem onPress={() => {
+                            this.hideCopyMenu(index);
+                            let link = "https://news.ycombinator.com/item?id=" + this.state.itemData.id;
+                            Clipboard.setString(link);
+                        }}>
+                            <Feather name="message-square" size={20} color="black" /><Text style={{textAlignVertical: "center"}}>  Comments</Text>
+                        </MenuItem>
+
+                        <MenuItem onPress={() => {
+                            this.hideCopyMenu(index);
+                            Clipboard.setString(this.state.itemData.title);
+                        }}>
+                            <Feather name="type" size={20} color="black" /><Text style={{textAlignVertical: "center"}}>  Title</Text>
+                        </MenuItem>
+                    </Menu>
+            </React.Fragment>
+
         );
     }
 
