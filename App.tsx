@@ -8,6 +8,7 @@ import * as StorageService from "./services/StorageService";
 import Profile from './components/Profile';
 import Thread from './components/Thread';
 import Settings from './components/Settings';
+import Login from './components/Login';
 
 import { NavigationContainer, useFocusEffect } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -70,7 +71,12 @@ function NewsScreen({route, navigation}: {route:any, navigation:any}){
     loadResources(setResourcesLoaded);
     return(
       <View style={styles.container}>
-        <ActivityIndicator size={"large"}></ActivityIndicator>
+        <View style={{flex: 1,
+          backgroundColor: '#fff',
+          alignItems: 'center',
+          justifyContent: 'center',}}>
+          <ActivityIndicator size={"large"}></ActivityIndicator>
+        </View>
       </View>
     ); 
   }
@@ -110,21 +116,42 @@ function SettingsScreen({route, navigation}: {route:any, navigation:any}) {
 }
 
 
-export default function App() {
+function LoginScreen({route, navigation}: {route:any, navigation:any}) {
+  return (
+    <Login navigation={navigation} />
+  );
+}
 
+
+export default function App() {
+  return RootStack();
+}
+
+function MainStack(){
+  return (
+    <Stack.Navigator
+      initialRouteName="News"
+    >
+      <Stack.Screen options={{headerShown:false}} name="News" component={NewsScreen} />
+      <Stack.Screen options={{headerShown:false}} name="Profile" component={ProfileScreen} />
+      <Stack.Screen options={{headerShown:false}} name="Thread" component={ThreadScreen} />
+      <Stack.Screen options={{headerShown:false}} name="Settings" component={SettingsScreen} />
+    </Stack.Navigator>
+  );
+}
+
+function RootStack(){
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="News"
+        mode="modal"
+        initialRouteName="Main"
       >
-        <Stack.Screen options={{headerShown:false}} name="News" component={NewsScreen} />
-        <Stack.Screen options={{headerShown:false}} name="Profile" component={ProfileScreen} />
-        <Stack.Screen options={{headerShown:false}} name="Thread" component={ThreadScreen} />
-        <Stack.Screen options={{headerShown:false}} name="Settings" component={SettingsScreen} />
+        <Stack.Screen options={{headerShown:false}} name="Main" component={MainStack} />
+        <Stack.Screen options={{headerShown:false, cardOverlayEnabled: true, cardStyle:{ backgroundColor: 'rgba(52, 52, 52, 0.8)'}}} name="Login" component={LoginScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
-
 }
 
 function navigationView(setNewsMode: Function, setShowOtherOptions: Function, showOtherOptions: boolean, drawer: any, navigation: any){
@@ -135,6 +162,7 @@ function navigationView(setNewsMode: Function, setShowOtherOptions: Function, sh
         </View>
         <TouchableNativeFeedback onPress={() => {
             console.log("TODO: Implement Login function :)");
+            navigation.navigate('Login');
           }}>
           <View style={[styles.sideMenuMainItem, {backgroundColor: "#90CAF9"}]}>
             <Text style={styles.menuItemText}>Login</Text>
